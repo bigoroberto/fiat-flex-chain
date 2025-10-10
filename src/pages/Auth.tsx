@@ -1,0 +1,225 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Wallet, Shield, TrendingUp } from "lucide-react";
+
+const Auth = () => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupName, setSignupName] = useState("");
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) throw error;
+
+      toast.success("Login successful!");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: signupEmail,
+        password: signupPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: signupName,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Account created! You can now log in.");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/10 p-4">
+      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
+        {/* Left side - Branding */}
+        <div className="hidden md:block space-y-6">
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold bg-gradient-accent bg-clip-text text-transparent">
+              CryptoBank
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              La tua banca digitale per criptovalute
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 rounded-lg bg-accent/10">
+                <Wallet className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Multi-Asset Wallet</h3>
+                <p className="text-sm text-muted-foreground">
+                  Gestisci BTC, ETH, USDT, USDC e valute fiat
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 rounded-lg bg-success/10">
+                <TrendingUp className="w-5 h-5 text-success" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Swap Istantaneo</h3>
+                <p className="text-sm text-muted-foreground">
+                  Scambia crypto e fiat con il miglior prezzo
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 rounded-lg bg-primary/10">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Sicurezza Avanzata</h3>
+                <p className="text-sm text-muted-foreground">
+                  2FA, cold storage e monitoraggio 24/7
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right side - Auth forms */}
+        <Card className="shadow-lg-custom">
+          <CardHeader>
+            <CardTitle>Benvenuto</CardTitle>
+            <CardDescription>
+              Accedi o crea un nuovo account per iniziare
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="signup">Registrati</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email">Email</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="nome@esempio.com"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Password</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Accesso in corso..." : "Accedi"}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Nome Completo</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Mario Rossi"
+                      value={signupName}
+                      onChange={(e) => setSignupName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="nome@esempio.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Creazione account..." : "Crea Account"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default Auth;
