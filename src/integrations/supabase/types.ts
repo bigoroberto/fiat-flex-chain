@@ -14,30 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      profiles: {
+      payment_methods: {
         Row: {
           created_at: string | null
-          full_name: string | null
+          holder_name: string | null
+          iban: string | null
           id: string
-          kyc_status: string | null
-          phone: string | null
+          is_default: boolean | null
+          last_four: string | null
+          method_type: string
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
-          full_name?: string | null
-          id: string
-          kyc_status?: string | null
-          phone?: string | null
+          holder_name?: string | null
+          iban?: string | null
+          id?: string
+          is_default?: boolean | null
+          last_four?: string | null
+          method_type: string
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
+          holder_name?: string | null
+          iban?: string | null
+          id?: string
+          is_default?: boolean | null
+          last_four?: string | null
+          method_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          document_number: string | null
+          document_type: string | null
+          full_name: string | null
+          id: string
+          kyc_status: string | null
+          kyc_verified: boolean | null
+          phone: string | null
+          postal_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          document_number?: string | null
+          document_type?: string | null
+          full_name?: string | null
+          id: string
+          kyc_status?: string | null
+          kyc_verified?: boolean | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          document_number?: string | null
+          document_type?: string | null
           full_name?: string | null
           id?: string
           kyc_status?: string | null
+          kyc_verified?: boolean | null
           phone?: string | null
+          postal_code?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trading_assets: {
+        Row: {
+          asset_type: string
+          current_price: number
+          id: string
+          market_cap: number | null
+          name: string
+          price_change_24h: number | null
+          symbol: string
+          updated_at: string | null
+          volume_24h: number | null
+        }
+        Insert: {
+          asset_type: string
+          current_price: number
+          id?: string
+          market_cap?: number | null
+          name: string
+          price_change_24h?: number | null
+          symbol: string
+          updated_at?: string | null
+          volume_24h?: number | null
+        }
+        Update: {
+          asset_type?: string
+          current_price?: number
+          id?: string
+          market_cap?: number | null
+          name?: string
+          price_change_24h?: number | null
+          symbol?: string
+          updated_at?: string | null
+          volume_24h?: number | null
         }
         Relationships: []
       }
@@ -80,6 +176,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallets: {
         Row: {
           address: string | null
@@ -115,10 +232,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -245,6 +368,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

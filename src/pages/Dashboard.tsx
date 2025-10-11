@@ -2,21 +2,38 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ShoppingCart, LogOut, User } from "lucide-react";
-import WalletCard from "@/components/WalletCard";
-import TransactionList from "@/components/TransactionList";
-import ActionModal from "@/components/ActionModal";
+import { 
+  ArrowDownLeft, 
+  ArrowUpRight, 
+  ArrowLeftRight, 
+  ShoppingCart, 
+  LogOut, 
+  User, 
+  TrendingUp,
+  CreditCard,
+  Settings,
+  Shield,
+  Globe
+} from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Tutorial from "@/components/Tutorial";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t, language, setLanguage } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [wallets, setWallets] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [currentAction, setCurrentAction] = useState<"deposit" | "withdraw" | "swap" | "buy">("deposit");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -42,15 +59,26 @@ const Dashboard = () => {
     if (session?.user) {
       setUser(session.user);
       await fetchData(session.user.id);
+      await checkAdminRole(session.user.id);
     } else {
       navigate("/auth");
     }
   };
 
+  const checkAdminRole = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .single();
+    
+    setIsAdmin(!!data);
+  };
+
   const fetchData = async (userId: string) => {
     setIsLoading(true);
     try {
-      // Fetch wallets
       const { data: walletsData, error: walletsError } = await supabase
         .from("wallets")
         .select("*")
@@ -59,17 +87,6 @@ const Dashboard = () => {
 
       if (walletsError) throw walletsError;
       setWallets(walletsData || []);
-
-      // Fetch transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (transactionsError) throw transactionsError;
-      setTransactions(transactionsData || []);
     } catch (error: any) {
       toast.error(error.message || "Errore nel caricamento dei dati");
     } finally {
@@ -82,28 +99,17 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
-  const openModal = (action: "deposit" | "withdraw" | "swap" | "buy") => {
-    setCurrentAction(action);
-    setModalOpen(true);
-  };
-
-  const handleActionSuccess = () => {
-    if (user) {
-      fetchData(user.id);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-muted-foreground">Caricamento...</p>
+        <p className="text-lg text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
 
-  const cryptoWallets = wallets.filter(w => ["BTC", "ETH", "USDT", "USDC"].includes(w.asset_code));
-  const fiatWallets = wallets.filter(w => ["EUR", "USD"].includes(w.asset_code));
-  const totalBalance = fiatWallets.reduce((sum, w) => sum + parseFloat(w.balance), 0);
+  const totalBalance = wallets
+    .filter(w => ["EUR", "USD"].includes(w.asset_code))
+    .reduce((sum, w) => sum + parseFloat(w.balance), 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,16 +120,25 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold bg-gradient-accent bg-clip-text text-transparent">
-              CryptoBank
+              {t("app.title")}
             </h1>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted">
-                <User className="w-5 h-5" />
-                <span className="text-sm font-medium">{user?.email}</span>
-              </div>
+              <Select value={language} onValueChange={(val: any) => setLanguage(val)}>
+                <SelectTrigger className="w-32">
+                  <Globe className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="it">Italiano</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es">Español</SelectItem>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="de">Deutsch</SelectItem>
+                </SelectContent>
+              </Select>
               <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Esci
+                {t("common.logout")}
               </Button>
             </div>
           </div>
@@ -131,88 +146,92 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Balance Overview */}
+        {/* Balance Card */}
         <div className="bg-gradient-primary rounded-2xl p-8 text-white shadow-lg-custom">
-          <p className="text-sm opacity-80 mb-2">Saldo Totale</p>
-          <h2 className="text-5xl font-bold mb-6">
+          <p className="text-sm opacity-80 mb-2">{t("dashboard.totalBalance")}</p>
+          <h2 className="text-5xl font-bold mb-2">
             €{totalBalance.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
           </h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button
-              onClick={() => openModal("deposit")}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-white/20"
-            >
-              <ArrowDownLeft className="w-4 h-4 mr-2" />
-              Deposita
-            </Button>
-            <Button
-              onClick={() => openModal("withdraw")}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-white/20"
-            >
-              <ArrowUpRight className="w-4 h-4 mr-2" />
-              Preleva
-            </Button>
-            <Button
-              onClick={() => openModal("buy")}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-white/20"
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Acquista
-            </Button>
-            <Button
-              onClick={() => openModal("swap")}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-white/20"
-            >
-              <ArrowLeftRight className="w-4 h-4 mr-2" />
-              Swap
-            </Button>
-          </div>
         </div>
 
-        {/* Crypto Wallets */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Portafoglio Crypto</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {cryptoWallets.map((wallet) => (
-              <WalletCard
-                key={wallet.id}
-                asset={wallet.asset_code}
-                balance={parseFloat(wallet.balance)}
-                symbol={wallet.asset_code}
-                trend={Math.random() * 20 - 10}
-              />
-            ))}
-          </div>
+        {/* Main Menu - Revolut Style */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate("/trading")}
+          >
+            <CardContent className="flex flex-col items-center justify-center p-6 space-y-2">
+              <div className="p-4 rounded-full bg-primary/10">
+                <TrendingUp className="w-8 h-8 text-primary" />
+              </div>
+              <span className="font-semibold">{t("nav.trading")}</span>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate("/profile")}
+          >
+            <CardContent className="flex flex-col items-center justify-center p-6 space-y-2">
+              <div className="p-4 rounded-full bg-primary/10">
+                <CreditCard className="w-8 h-8 text-primary" />
+              </div>
+              <span className="font-semibold">{t("nav.profile")}</span>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate("/profile")}
+          >
+            <CardContent className="flex flex-col items-center justify-center p-6 space-y-2">
+              <div className="p-4 rounded-full bg-primary/10">
+                <Settings className="w-8 h-8 text-primary" />
+              </div>
+              <span className="font-semibold">Impostazioni</span>
+            </CardContent>
+          </Card>
+
+          {isAdmin && (
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow border-primary"
+              onClick={() => navigate("/admin")}
+            >
+              <CardContent className="flex flex-col items-center justify-center p-6 space-y-2">
+                <div className="p-4 rounded-full bg-primary/10">
+                  <Shield className="w-8 h-8 text-primary" />
+                </div>
+                <span className="font-semibold">{t("nav.admin")}</span>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Fiat Wallets */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Conti Fiat</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {fiatWallets.map((wallet) => (
-              <WalletCard
-                key={wallet.id}
-                asset={wallet.asset_code}
-                balance={parseFloat(wallet.balance)}
-                symbol={wallet.asset_code}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Transactions */}
-        <TransactionList transactions={transactions} />
+        {/* Quick Actions */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Azioni Rapide</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                <ArrowDownLeft className="w-5 h-5" />
+                <span className="text-sm">{t("dashboard.deposit")}</span>
+              </Button>
+              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                <ArrowUpRight className="w-5 h-5" />
+                <span className="text-sm">{t("dashboard.withdraw")}</span>
+              </Button>
+              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                <span className="text-sm">{t("dashboard.buy")}</span>
+              </Button>
+              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                <ArrowLeftRight className="w-5 h-5" />
+                <span className="text-sm">{t("dashboard.swap")}</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
-
-      <ActionModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        action={currentAction}
-        wallets={wallets}
-        userId={user?.id || ""}
-        onSuccess={handleActionSuccess}
-      />
     </div>
   );
 };
