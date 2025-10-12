@@ -17,6 +17,12 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
+  const [signupDob, setSignupDob] = useState("");
+  const [signupAddress, setSignupAddress] = useState("");
+  const [signupCity, setSignupCity] = useState("");
+  const [signupCountry, setSignupCountry] = useState("");
+  const [signupDocType, setSignupDocType] = useState("");
+  const [signupDocNumber, setSignupDocNumber] = useState("");
 
   useEffect(() => {
     // Check if user is already logged in
@@ -55,6 +61,21 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Validate age (must be 18+)
+      const dob = new Date(signupDob);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        toast.error("Devi avere almeno 18 anni per registrarti");
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
@@ -62,16 +83,34 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: signupName,
+            date_of_birth: signupDob,
+            address: signupAddress,
+            city: signupCity,
+            country: signupCountry,
+            document_type: signupDocType,
+            document_number: signupDocNumber,
           },
         },
       });
 
       if (error) throw error;
 
-      toast.success("Account created! You can now log in.");
+      // Update profile with KYC data
+      if (data.user) {
+        await supabase.from("profiles").update({
+          date_of_birth: signupDob,
+          address: signupAddress,
+          city: signupCity,
+          country: signupCountry,
+          document_type: signupDocType,
+          document_number: signupDocNumber,
+        }).eq("id", data.user.id);
+      }
+
+      toast.success("Account creato! Puoi ora effettuare il login.");
       navigate("/");
     } catch (error: any) {
-      toast.error(error.message || "Signup failed");
+      toast.error(error.message || "Registrazione fallita");
     } finally {
       setIsLoading(false);
     }
@@ -175,9 +214,9 @@ const Auth = () => {
               </TabsContent>
               
               <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
+                <form onSubmit={handleSignup} className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nome Completo</Label>
+                    <Label htmlFor="signup-name">Nome Completo *</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -188,7 +227,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">Email *</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -199,7 +238,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">Password *</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -209,9 +248,96 @@ const Auth = () => {
                       minLength={6}
                     />
                   </div>
+                  
+                  <div className="border-t pt-4 mt-4">
+                    <h3 className="font-semibold mb-3">Verifica KYC (Obbligatorio)</h3>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-dob">Data di Nascita * (Minimo 18 anni)</Label>
+                      <Input
+                        id="signup-dob"
+                        type="date"
+                        value={signupDob}
+                        onChange={(e) => setSignupDob(e.target.value)}
+                        required
+                        max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-address">Indirizzo *</Label>
+                      <Input
+                        id="signup-address"
+                        type="text"
+                        placeholder="Via Roma 123"
+                        value={signupAddress}
+                        onChange={(e) => setSignupAddress(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-city">Città *</Label>
+                        <Input
+                          id="signup-city"
+                          type="text"
+                          placeholder="Milano"
+                          value={signupCity}
+                          onChange={(e) => setSignupCity(e.target.value)}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-country">Paese *</Label>
+                        <Input
+                          id="signup-country"
+                          type="text"
+                          placeholder="Italia"
+                          value={signupCountry}
+                          onChange={(e) => setSignupCountry(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-doctype">Tipo Documento *</Label>
+                      <select
+                        id="signup-doctype"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                        value={signupDocType}
+                        onChange={(e) => setSignupDocType(e.target.value)}
+                        required
+                      >
+                        <option value="">Seleziona tipo documento</option>
+                        <option value="passport">Passaporto</option>
+                        <option value="id_card">Carta d'Identità</option>
+                        <option value="driving_license">Patente</option>
+                      </select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-docnumber">Numero Documento *</Label>
+                      <Input
+                        id="signup-docnumber"
+                        type="text"
+                        placeholder="AA1234567"
+                        value={signupDocNumber}
+                        onChange={(e) => setSignupDocNumber(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Creazione account..." : "Crea Account"}
                   </Button>
+                  
+                  <p className="text-xs text-muted-foreground text-center">
+                    I tuoi dati sono protetti e verranno verificati per garantire la sicurezza
+                  </p>
                 </form>
               </TabsContent>
             </Tabs>
