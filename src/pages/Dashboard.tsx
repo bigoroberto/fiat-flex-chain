@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Tutorial from "@/components/Tutorial";
+import ActionModal from "@/components/ActionModal";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ const Dashboard = () => {
   const [wallets, setWallets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentAction, setCurrentAction] = useState<"deposit" | "withdraw" | "swap" | "buy">("deposit");
 
   useEffect(() => {
     checkAuth();
@@ -97,6 +100,17 @@ const Dashboard = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
+  };
+
+  const openModal = (action: "deposit" | "withdraw" | "swap" | "buy") => {
+    setCurrentAction(action);
+    setModalOpen(true);
+  };
+
+  const handleActionSuccess = () => {
+    if (user) {
+      fetchData(user.id);
+    }
   };
 
   if (isLoading) {
@@ -212,19 +226,35 @@ const Dashboard = () => {
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">Azioni Rapide</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+              <Button 
+                variant="outline" 
+                className="h-auto py-4 flex flex-col gap-2"
+                onClick={() => openModal("deposit")}
+              >
                 <ArrowDownLeft className="w-5 h-5" />
                 <span className="text-sm">{t("dashboard.deposit")}</span>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+              <Button 
+                variant="outline" 
+                className="h-auto py-4 flex flex-col gap-2"
+                onClick={() => openModal("withdraw")}
+              >
                 <ArrowUpRight className="w-5 h-5" />
                 <span className="text-sm">{t("dashboard.withdraw")}</span>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+              <Button 
+                variant="outline" 
+                className="h-auto py-4 flex flex-col gap-2"
+                onClick={() => openModal("buy")}
+              >
                 <ShoppingCart className="w-5 h-5" />
                 <span className="text-sm">{t("dashboard.buy")}</span>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+              <Button 
+                variant="outline" 
+                className="h-auto py-4 flex flex-col gap-2"
+                onClick={() => openModal("swap")}
+              >
                 <ArrowLeftRight className="w-5 h-5" />
                 <span className="text-sm">{t("dashboard.swap")}</span>
               </Button>
@@ -232,6 +262,15 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </main>
+
+      <ActionModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        action={currentAction}
+        wallets={wallets}
+        userId={user?.id || ""}
+        onSuccess={handleActionSuccess}
+      />
     </div>
   );
 };
