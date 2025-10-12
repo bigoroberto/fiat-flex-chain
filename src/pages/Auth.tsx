@@ -23,13 +23,15 @@ const Auth = () => {
   const [signupCountry, setSignupCountry] = useState("");
   const [signupDocType, setSignupDocType] = useState("");
   const [signupDocNumber, setSignupDocNumber] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        navigate("/dashboard");
       }
     };
     checkAuth();
@@ -48,9 +50,30 @@ const Auth = () => {
       if (error) throw error;
 
       toast.success("Login successful!");
-      navigate("/");
+      navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+
+      toast.success("Email di recupero inviata! Controlla la tua casella di posta.");
+      setShowResetPassword(false);
+      setResetEmail("");
+    } catch (error: any) {
+      toast.error(error.message || "Errore nell'invio dell'email di recupero");
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +103,7 @@ const Auth = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             full_name: signupName,
             date_of_birth: signupDob,
@@ -108,7 +131,7 @@ const Auth = () => {
       }
 
       toast.success("Account creato! Puoi ora effettuare il login.");
-      navigate("/");
+      navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Registrazione fallita");
     } finally {
@@ -185,32 +208,70 @@ const Auth = () => {
               </TabsList>
               
               <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="nome@esempio.com"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Accesso in corso..." : "Accedi"}
-                  </Button>
-                </form>
+                {!showResetPassword ? (
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">Email</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="nome@esempio.com"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password">Password</Label>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Accesso in corso..." : "Accedi"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="w-full text-sm"
+                      onClick={() => setShowResetPassword(true)}
+                    >
+                      Password dimenticata?
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="nome@esempio.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Ti invieremo un'email con le istruzioni per reimpostare la password.
+                    </p>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Invio in corso..." : "Invia Email di Recupero"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="w-full text-sm"
+                      onClick={() => setShowResetPassword(false)}
+                    >
+                      Torna al Login
+                    </Button>
+                  </form>
+                )}
               </TabsContent>
               
               <TabsContent value="signup">

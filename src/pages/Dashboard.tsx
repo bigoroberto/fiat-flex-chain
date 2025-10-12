@@ -64,7 +64,7 @@ const Dashboard = () => {
       await fetchData(session.user.id);
       await checkAdminRole(session.user.id);
     } else {
-      navigate("/auth");
+      navigate("/");
     }
   };
 
@@ -99,7 +99,7 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/auth");
+    navigate("/");
   };
 
   const openModal = (action: "deposit" | "withdraw" | "swap" | "buy") => {

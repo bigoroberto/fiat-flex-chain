@@ -58,39 +58,134 @@ const ActionModal = ({ isOpen, onClose, action, wallets, userId, onSuccess }: Ac
     setIsLoading(true);
 
     try {
+      const amountNum = parseFloat(amount);
+      
+      // Validate amount
+      if (isNaN(amountNum) || amountNum <= 0) {
+        toast.error("Inserisci un importo valido");
+        setIsLoading(false);
+        return;
+      }
+
+      // Check balance for withdraw and swap
+      if ((action === "withdraw" || action === "swap") && selectedAsset) {
+        const wallet = wallets.find(w => w.asset_code === selectedAsset);
+        if (!wallet || wallet.balance < amountNum) {
+          toast.error("Saldo insufficiente");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // For buy action, check EUR balance
+      if (action === "buy") {
+        const eurWallet = wallets.find(w => w.asset_code === "EUR");
+        if (!eurWallet || eurWallet.balance < amountNum) {
+          toast.error("Saldo EUR insufficiente");
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const transactionData: any = {
         user_id: userId,
         transaction_type: action,
         asset_to: action === "swap" ? selectedAssetTo : (action === "buy" ? selectedTradingAsset?.symbol : selectedAsset),
-        amount: parseFloat(amount),
-        status: "pending",
+        amount: amountNum,
+        status: "completed",
+        completed_at: new Date().toISOString(),
       };
 
       if (action === "swap") {
         transactionData.asset_from = selectedAsset;
       }
 
-      const { error } = await supabase
+      const { error: txError } = await supabase
         .from("transactions")
         .insert(transactionData);
 
-      if (error) throw error;
+      if (txError) throw txError;
 
-      // Simulate transaction completion after 2 seconds
-      setTimeout(async () => {
-        const { error: updateError } = await supabase
-          .from("transactions")
-          .update({ status: "completed", completed_at: new Date().toISOString() })
-          .eq("user_id", userId)
-          .eq("status", "pending");
-
-        if (!updateError) {
-          toast.success("Operazione completata con successo!");
-          onSuccess();
+      // Update wallet balances
+      if (action === "deposit") {
+        // Increase balance
+        const wallet = wallets.find(w => w.asset_code === selectedAsset);
+        if (wallet) {
+          const { error: walletError } = await supabase
+            .from("wallets")
+            .update({ balance: wallet.balance + amountNum })
+            .eq("user_id", userId)
+            .eq("asset_code", selectedAsset);
+          
+          if (walletError) throw walletError;
         }
-      }, 2000);
+      } else if (action === "withdraw") {
+        // Decrease balance
+        const wallet = wallets.find(w => w.asset_code === selectedAsset);
+        if (wallet) {
+          const { error: walletError } = await supabase
+            .from("wallets")
+            .update({ balance: wallet.balance - amountNum })
+            .eq("user_id", userId)
+            .eq("asset_code", selectedAsset);
+          
+          if (walletError) throw walletError;
+        }
+      } else if (action === "swap") {
+        // Decrease from asset, increase to asset
+        const fromWallet = wallets.find(w => w.asset_code === selectedAsset);
+        const toWallet = wallets.find(w => w.asset_code === selectedAssetTo);
+        
+        if (fromWallet) {
+          await supabase
+            .from("wallets")
+            .update({ balance: fromWallet.balance - amountNum })
+            .eq("user_id", userId)
+            .eq("asset_code", selectedAsset);
+        }
+        
+        if (toWallet) {
+          // Simple 1:1 conversion for demo
+          await supabase
+            .from("wallets")
+            .update({ balance: toWallet.balance + amountNum })
+            .eq("user_id", userId)
+            .eq("asset_code", selectedAssetTo);
+        }
+      } else if (action === "buy" && selectedTradingAsset) {
+        // Decrease EUR balance
+        const eurWallet = wallets.find(w => w.asset_code === "EUR");
+        if (eurWallet) {
+          await supabase
+            .from("wallets")
+            .update({ balance: eurWallet.balance - amountNum })
+            .eq("user_id", userId)
+            .eq("asset_code", "EUR");
+        }
+        
+        // Create or update asset wallet
+        const assetWallet = wallets.find(w => w.asset_code === selectedTradingAsset.symbol);
+        const tokensReceived = amountNum / selectedTradingAsset.current_price;
+        
+        if (assetWallet) {
+          await supabase
+            .from("wallets")
+            .update({ balance: assetWallet.balance + tokensReceived })
+            .eq("user_id", userId)
+            .eq("asset_code", selectedTradingAsset.symbol);
+        } else {
+          await supabase
+            .from("wallets")
+            .insert({
+              user_id: userId,
+              asset_code: selectedTradingAsset.symbol,
+              balance: tokensReceived,
+            });
+        }
+      }
 
-      toast.success("Operazione in corso...");
+      toast.success("Operazione completata con successo!");
+      onSuccess();
       onClose();
       setAmount("");
       setSelectedAsset("");
