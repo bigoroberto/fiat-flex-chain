@@ -133,9 +133,12 @@ const Dashboard = () => {
       <header className="border-b bg-card shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold bg-gradient-accent bg-clip-text text-transparent">
+            <button 
+              onClick={() => navigate("/dashboard")}
+              className="text-2xl font-bold bg-gradient-accent bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer border-none bg-transparent"
+            >
               {t("app.title")}
-            </h1>
+            </button>
             <div className="flex items-center gap-4">
               <Select value={language} onValueChange={(val: any) => setLanguage(val)}>
                 <SelectTrigger className="w-32">

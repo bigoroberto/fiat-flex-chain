@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Search, TrendingUp, TrendingDown, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ const Trading = () => {
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [investAmount, setInvestAmount] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [assetFilter, setAssetFilter] = useState<"all" | "crypto" | "fiat">("all");
 
   useEffect(() => {
     checkAuth();
@@ -31,7 +33,7 @@ const Trading = () => {
 
   useEffect(() => {
     filterAssets();
-  }, [searchQuery, assets]);
+  }, [searchQuery, assets, assetFilter]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -62,17 +64,25 @@ const Trading = () => {
   };
 
   const filterAssets = () => {
-    if (!searchQuery) {
-      setFilteredAssets(assets);
-      return;
+    let filtered = assets;
+
+    // Filter by asset type
+    if (assetFilter === "crypto") {
+      filtered = filtered.filter((asset) => asset.asset_type === "crypto");
+    } else if (assetFilter === "fiat") {
+      filtered = filtered.filter((asset) => asset.asset_type === "stock");
     }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = assets.filter(
-      (asset) =>
-        asset.name.toLowerCase().includes(query) ||
-        asset.symbol.toLowerCase().includes(query)
-    );
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (asset) =>
+          asset.name.toLowerCase().includes(query) ||
+          asset.symbol.toLowerCase().includes(query)
+      );
+    }
+
     setFilteredAssets(filtered);
   };
 
@@ -142,6 +152,15 @@ const Trading = () => {
             className="pl-10"
           />
         </div>
+
+        {/* Asset Type Filter */}
+        <Tabs value={assetFilter} onValueChange={(v) => setAssetFilter(v as any)} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">Tutti</TabsTrigger>
+            <TabsTrigger value="crypto">Crypto</TabsTrigger>
+            <TabsTrigger value="fiat">Azioni</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {/* Recommended (Positive Change) */}
         {recommendedAssets.length > 0 && (

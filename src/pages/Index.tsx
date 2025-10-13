@@ -222,6 +222,76 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Cards Animation Section */}
+      <section className="py-20 bg-gradient-to-b from-background to-muted/30">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+            Come Investire con CryptoBank
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="text-center space-y-4 animate-fade-in">
+              <div className="w-full aspect-[1.586] bg-gradient-to-br from-primary via-primary-glow to-accent rounded-2xl p-6 shadow-elegant transform hover:scale-105 transition-transform duration-300">
+                <div className="h-full flex flex-col justify-between text-primary-foreground">
+                  <div className="text-left">
+                    <div className="w-12 h-12 bg-background/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">1</span>
+                    </div>
+                    <p className="font-semibold">Registrazione</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm opacity-80">CryptoBank</p>
+                  </div>
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold">Crea il Tuo Account</h3>
+              <p className="text-muted-foreground">
+                Registrati in pochi minuti con email e password. Verifica la tua identità per accedere a tutte le funzionalità.
+              </p>
+            </div>
+
+            <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              <div className="w-full aspect-[1.586] bg-gradient-to-br from-accent via-primary to-primary-glow rounded-2xl p-6 shadow-elegant transform hover:scale-105 transition-transform duration-300">
+                <div className="h-full flex flex-col justify-between text-primary-foreground">
+                  <div className="text-left">
+                    <div className="w-12 h-12 bg-background/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">2</span>
+                    </div>
+                    <p className="font-semibold">Deposito</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm opacity-80">€1,000</p>
+                  </div>
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold">Deposita Fondi</h3>
+              <p className="text-muted-foreground">
+                Aggiungi fondi al tuo wallet in modo sicuro tramite bonifico bancario o carta. Inizia con qualsiasi importo.
+              </p>
+            </div>
+
+            <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+              <div className="w-full aspect-[1.586] bg-gradient-to-br from-success via-primary-glow to-primary rounded-2xl p-6 shadow-elegant transform hover:scale-105 transition-transform duration-300">
+                <div className="h-full flex flex-col justify-between text-primary-foreground">
+                  <div className="text-left">
+                    <div className="w-12 h-12 bg-background/20 rounded-lg flex items-center justify-center mb-4">
+                      <span className="text-2xl">3</span>
+                    </div>
+                    <p className="font-semibold">Investimento</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm opacity-80">+12.5%</p>
+                  </div>
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold">Inizia a Investire</h3>
+              <p className="text-muted-foreground">
+                Scegli tra crypto e azioni, monitora i tuoi investimenti in tempo reale e diversifica il tuo portfolio.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-primary text-white">
         <div className="container mx-auto px-4 text-center">
