@@ -222,24 +222,32 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Cards Animation Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-muted/30">
+      {/* Cards Animation Section - Premium Credit Cards Style */}
+      <section className="py-20 bg-gradient-to-b from-background to-muted/30 overflow-hidden">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
             Come Investire con CryptoBank
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Card 1 - American Express Style */}
             <div className="text-center space-y-4 animate-fade-in">
-              <div className="w-full aspect-[1.586] bg-gradient-to-br from-primary via-primary-glow to-accent rounded-2xl p-6 shadow-elegant transform hover:scale-105 transition-transform duration-300">
-                <div className="h-full flex flex-col justify-between text-primary-foreground">
+              <div className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900" />
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30" />
+                <div className="relative h-full flex flex-col justify-between p-6 text-white">
                   <div className="text-left">
-                    <div className="w-12 h-12 bg-background/20 rounded-lg flex items-center justify-center mb-4">
-                      <span className="text-2xl">1</span>
+                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
+                      <span className="text-3xl font-bold">1</span>
                     </div>
-                    <p className="font-semibold">Registrazione</p>
+                    <p className="font-bold text-lg tracking-wide">REGISTRAZIONE</p>
+                    <p className="text-xs opacity-80 mt-1">Membro Platinum</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm opacity-80">CryptoBank</p>
+                    <p className="text-xs opacity-60 mb-1">CRYPTOBANK</p>
+                    <div className="flex justify-end items-center gap-1">
+                      <div className="w-8 h-8 rounded-full bg-white/30" />
+                      <div className="w-8 h-8 rounded-full bg-white/30 -ml-4" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -249,17 +257,28 @@ const Index = () => {
               </p>
             </div>
 
+            {/* Card 2 - Visa Infinite Style */}
             <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              <div className="w-full aspect-[1.586] bg-gradient-to-br from-accent via-primary to-primary-glow rounded-2xl p-6 shadow-elegant transform hover:scale-105 transition-transform duration-300">
-                <div className="h-full flex flex-col justify-between text-primary-foreground">
+              <div className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full blur-3xl" />
+                <div className="relative h-full flex flex-col justify-between p-6 text-white">
                   <div className="text-left">
-                    <div className="w-12 h-12 bg-background/20 rounded-lg flex items-center justify-center mb-4">
-                      <span className="text-2xl">2</span>
-                    </div>
-                    <p className="font-semibold">Deposito</p>
+                    <div className="w-12 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg mb-4 shadow-lg" />
+                    <p className="font-bold text-lg tracking-wider">DEPOSITO</p>
+                    <p className="text-xs opacity-80 mt-1">Carte Premium</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm opacity-80">€1,000</p>
+                  <div>
+                    <p className="text-2xl font-mono font-bold tracking-wider mb-4">
+                      •••• •••• •••• 1000
+                    </p>
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-xs opacity-60">Saldo Disponibile</p>
+                        <p className="font-semibold">€1,000.00</p>
+                      </div>
+                      <p className="text-xs font-bold tracking-widest">VISA</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -269,17 +288,33 @@ const Index = () => {
               </p>
             </div>
 
+            {/* Card 3 - Mastercard World Elite Style */}
             <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-              <div className="w-full aspect-[1.586] bg-gradient-to-br from-success via-primary-glow to-primary rounded-2xl p-6 shadow-elegant transform hover:scale-105 transition-transform duration-300">
-                <div className="h-full flex flex-col justify-between text-primary-foreground">
+              <div className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800" />
+                <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full" />
+                <div className="absolute -top-20 -left-20 w-64 h-64 bg-black/10 rounded-full" />
+                <div className="relative h-full flex flex-col justify-between p-6 text-white">
                   <div className="text-left">
-                    <div className="w-12 h-12 bg-background/20 rounded-lg flex items-center justify-center mb-4">
-                      <span className="text-2xl">3</span>
+                    <div className="flex gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-red-500/80 border-2 border-white" />
+                      <div className="w-8 h-8 rounded-full bg-orange-400/80 border-2 border-white -ml-4" />
                     </div>
-                    <p className="font-semibold">Investimento</p>
+                    <p className="font-bold text-lg tracking-wide">INVESTIMENTO</p>
+                    <p className="text-xs opacity-80 mt-1">World Elite</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm opacity-80">+12.5%</p>
+                  <div>
+                    <div className="mb-4">
+                      <p className="text-xs opacity-60 mb-1">Rendimento Annuale</p>
+                      <p className="text-3xl font-bold text-green-300">+12.5%</p>
+                    </div>
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-xs opacity-60">Portfolio Attivo</p>
+                        <p className="text-sm font-semibold">Dal 2025</p>
+                      </div>
+                      <p className="text-xs font-bold tracking-widest">MASTERCARD</p>
+                    </div>
                   </div>
                 </div>
               </div>

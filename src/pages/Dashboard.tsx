@@ -27,6 +27,10 @@ import {
 } from "@/components/ui/select";
 import Tutorial from "@/components/Tutorial";
 import ActionModal from "@/components/ActionModal";
+import PortfolioHistory from "@/components/PortfolioHistory";
+import ActiveInvestments from "@/components/ActiveInvestments";
+import ProfitChart from "@/components/ProfitChart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -264,6 +268,27 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Portfolio Tabs */}
+        <Tabs defaultValue="investments" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="investments">Investimenti Attivi</TabsTrigger>
+            <TabsTrigger value="history">Storico</TabsTrigger>
+            <TabsTrigger value="profit">Guadagni</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="investments" className="mt-6">
+            <ActiveInvestments userId={user?.id || ""} />
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-6">
+            <PortfolioHistory userId={user?.id || ""} />
+          </TabsContent>
+          
+          <TabsContent value="profit" className="mt-6">
+            <ProfitChart userId={user?.id || ""} />
+          </TabsContent>
+        </Tabs>
       </main>
 
       <ActionModal

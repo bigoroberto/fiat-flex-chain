@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Label } from "@/components/ui/label";
 
 const Trading = () => {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const Trading = () => {
   const [filteredAssets, setFilteredAssets] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
-  const [investAmount, setInvestAmount] = useState("");
+  const [numShares, setNumShares] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [assetFilter, setAssetFilter] = useState<"all" | "crypto" | "fiat">("all");
 
@@ -87,10 +89,13 @@ const Trading = () => {
   };
 
   const handleInvest = async () => {
-    if (!investAmount || parseFloat(investAmount) <= 0) {
-      toast.error("Inserisci un importo valido");
+    if (!numShares || parseFloat(numShares) <= 0) {
+      toast.error("Inserisci un numero di azioni valido");
       return;
     }
+
+    const shares = parseFloat(numShares);
+    const totalCost = shares * selectedAsset.current_price;
 
     try {
       // Create a buy transaction
@@ -98,19 +103,37 @@ const Trading = () => {
         user_id: user.id,
         transaction_type: "buy",
         asset_to: selectedAsset.symbol,
-        amount: parseFloat(investAmount),
+        amount: shares,
         status: "completed",
         completed_at: new Date().toISOString(),
       });
 
       if (error) throw error;
 
-      toast.success(`Investimento di €${investAmount} in ${selectedAsset.name} completato!`);
+      toast.success(`Acquistate ${shares} azioni di ${selectedAsset.name} per €${totalCost.toFixed(2)}!`);
       setSelectedAsset(null);
-      setInvestAmount("");
+      setNumShares("");
     } catch (error: any) {
       toast.error(error.message);
     }
+  };
+
+  // Mock historical price data for chart
+  const getHistoricalData = (currentPrice: number, change24h: number) => {
+    const data = [];
+    const pointsCount = 24;
+    const priceChange = (currentPrice * change24h) / 100;
+    
+    for (let i = 0; i < pointsCount; i++) {
+      const progress = i / pointsCount;
+      const price = currentPrice - priceChange + (priceChange * progress);
+      data.push({
+        time: `${i}h`,
+        price: price,
+      });
+    }
+    
+    return data;
   };
 
   const recommendedAssets = filteredAssets.filter((a) => a.price_change_24h > 0);
@@ -255,34 +278,92 @@ const Trading = () => {
 
       {/* Invest Dialog */}
       <Dialog open={!!selectedAsset} onOpenChange={() => setSelectedAsset(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t("trading.invest")} in {selectedAsset?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Prezzo Attuale</p>
-              <p className="text-2xl font-bold">
-                €{selectedAsset?.current_price.toLocaleString('it-IT', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
+          <div className="space-y-6">
+            {/* Price Chart */}
+            {selectedAsset && (
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={getHistoricalData(selectedAsset.current_price, selectedAsset.price_change_24h)}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis 
+                      dataKey="time" 
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={10}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={10}
+                      domain={['auto', 'auto']}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                      formatter={(value: any) => [
+                        `€${value.toFixed(2)}`,
+                        'Prezzo'
+                      ]}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="price" 
+                      stroke={selectedAsset.price_change_24h > 0 ? 'hsl(var(--success))' : 'hsl(var(--destructive))'} 
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Prezzo Attuale</p>
+                <p className="text-2xl font-bold">
+                  €{selectedAsset?.current_price.toLocaleString('it-IT', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Variazione 24h</p>
+                <p className={`text-2xl font-bold ${selectedAsset?.price_change_24h > 0 ? 'text-success' : 'text-destructive'}`}>
+                  {selectedAsset?.price_change_24h > 0 ? '+' : ''}{selectedAsset?.price_change_24h.toFixed(2)}%
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Importo da Investire (EUR)</label>
+
+            <div className="space-y-2">
+              <Label htmlFor="numShares">Numero di Azioni</Label>
               <Input
+                id="numShares"
                 type="number"
-                placeholder="100.00"
-                value={investAmount}
-                onChange={(e) => setInvestAmount(e.target.value)}
-                min="0"
+                placeholder="1"
+                value={numShares}
+                onChange={(e) => setNumShares(e.target.value)}
+                min="0.01"
                 step="0.01"
               />
+              {numShares && selectedAsset && (
+                <p className="text-sm text-muted-foreground">
+                  Costo totale: €{(parseFloat(numShares) * selectedAsset.current_price).toLocaleString('it-IT', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              )}
             </div>
+
             <div className="flex gap-2">
               <Button onClick={handleInvest} className="flex-1">
-                Conferma Investimento
+                Conferma Acquisto
               </Button>
               <Button variant="outline" onClick={() => setSelectedAsset(null)}>
                 {t("common.cancel")}
