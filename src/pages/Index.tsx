@@ -41,7 +41,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
             <h1 className="text-6xl md:text-7xl font-bold bg-gradient-accent bg-clip-text text-transparent leading-tight">
-              Il Futuro del Trading è Qui
+              L'Online Banking Fatto per Te
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
               Investi in azioni, crypto e asset globali con la piattaforma più sicura e innovativa
@@ -229,14 +229,23 @@ const Index = () => {
             Come Investire con CryptoBank
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Card 1 - American Express Style */}
-            <div className="text-center space-y-4 animate-fade-in">
-              <div className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900" />
+            {/* Card 1 - American Express Style - Interactive */}
+            <div className="text-center space-y-4 animate-fade-in group">
+              <div 
+                className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl cursor-pointer transform transition-all duration-500 hover:scale-110 hover:-rotate-3 perspective-1000"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.5)'
+                }}
+                onClick={() => navigate("/auth")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900" 
+                     style={{ transform: 'translateZ(20px)' }} />
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30" />
-                <div className="relative h-full flex flex-col justify-between p-6 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="relative h-full flex flex-col justify-between p-6 text-white" style={{ transform: 'translateZ(30px)' }}>
                   <div className="text-left">
-                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
+                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30 shadow-lg">
                       <span className="text-3xl font-bold">1</span>
                     </div>
                     <p className="font-bold text-lg tracking-wide">REGISTRAZIONE</p>
@@ -245,11 +254,12 @@ const Index = () => {
                   <div className="text-right">
                     <p className="text-xs opacity-60 mb-1">CRYPTOBANK</p>
                     <div className="flex justify-end items-center gap-1">
-                      <div className="w-8 h-8 rounded-full bg-white/30" />
-                      <div className="w-8 h-8 rounded-full bg-white/30 -ml-4" />
+                      <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm" />
+                      <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm -ml-4" />
                     </div>
                   </div>
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
               <h3 className="text-xl font-semibold">Crea il Tuo Account</h3>
               <p className="text-muted-foreground">
@@ -257,14 +267,24 @@ const Index = () => {
               </p>
             </div>
 
-            {/* Card 2 - Visa Infinite Style */}
-            <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              <div className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
+            {/* Card 2 - Visa Infinite Style - Interactive */}
+            <div className="text-center space-y-4 animate-fade-in group" style={{ animationDelay: "0.2s" }}>
+              <div 
+                className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl cursor-pointer transform transition-all duration-500 hover:scale-110 hover:rotate-3 perspective-1000"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  boxShadow: '0 25px 50px -12px rgba(234, 179, 8, 0.5)'
+                }}
+                onClick={() => navigate("/dashboard")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" 
+                     style={{ transform: 'translateZ(20px)' }} />
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full blur-3xl" />
-                <div className="relative h-full flex flex-col justify-between p-6 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                <div className="relative h-full flex flex-col justify-between p-6 text-white" style={{ transform: 'translateZ(30px)' }}>
                   <div className="text-left">
-                    <div className="w-12 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg mb-4 shadow-lg" />
+                    <div className="w-12 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg mb-4 shadow-lg" 
+                         style={{ boxShadow: '0 4px 15px rgba(234, 179, 8, 0.5)' }} />
                     <p className="font-bold text-lg tracking-wider">DEPOSITO</p>
                     <p className="text-xs opacity-80 mt-1">Carte Premium</p>
                   </div>
@@ -281,6 +301,7 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
               <h3 className="text-xl font-semibold">Deposita Fondi</h3>
               <p className="text-muted-foreground">
@@ -288,17 +309,28 @@ const Index = () => {
               </p>
             </div>
 
-            {/* Card 3 - Mastercard World Elite Style */}
-            <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-              <div className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 hover:rotate-1 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800" />
+            {/* Card 3 - Mastercard World Elite Style - Interactive */}
+            <div className="text-center space-y-4 animate-fade-in group" style={{ animationDelay: "0.4s" }}>
+              <div 
+                className="w-full aspect-[1.586] relative rounded-2xl overflow-hidden shadow-2xl cursor-pointer transform transition-all duration-500 hover:scale-110 hover:-rotate-2 perspective-1000"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  boxShadow: '0 25px 50px -12px rgba(16, 185, 129, 0.5)'
+                }}
+                onClick={() => navigate("/trading")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800" 
+                     style={{ transform: 'translateZ(20px)' }} />
                 <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full" />
                 <div className="absolute -top-20 -left-20 w-64 h-64 bg-black/10 rounded-full" />
-                <div className="relative h-full flex flex-col justify-between p-6 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="relative h-full flex flex-col justify-between p-6 text-white" style={{ transform: 'translateZ(30px)' }}>
                   <div className="text-left">
                     <div className="flex gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-red-500/80 border-2 border-white" />
-                      <div className="w-8 h-8 rounded-full bg-orange-400/80 border-2 border-white -ml-4" />
+                      <div className="w-8 h-8 rounded-full bg-red-500/80 border-2 border-white shadow-lg" 
+                           style={{ boxShadow: '0 4px 15px rgba(239, 68, 68, 0.5)' }} />
+                      <div className="w-8 h-8 rounded-full bg-orange-400/80 border-2 border-white -ml-4 shadow-lg"
+                           style={{ boxShadow: '0 4px 15px rgba(251, 146, 60, 0.5)' }} />
                     </div>
                     <p className="font-bold text-lg tracking-wide">INVESTIMENTO</p>
                     <p className="text-xs opacity-80 mt-1">World Elite</p>
@@ -317,12 +349,236 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
               <h3 className="text-xl font-semibold">Inizia a Investire</h3>
               <p className="text-muted-foreground">
                 Scegli tra crypto e azioni, monitora i tuoi investimenti in tempo reale e diversifica il tuo portfolio.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Plans Section */}
+      <section className="py-20 bg-gradient-to-b from-muted/30 to-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Scegli il Tuo Piano
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Piani flessibili per ogni tipo di investitore
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {/* Standard Plan - Free */}
+            <Card className="relative hover-scale animate-fade-in border-2">
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-2">Standard</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">Gratis</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Perfetto per iniziare</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Trading base</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">5 operazioni/mese</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Commissioni 2%</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Supporto email</span>
+                  </li>
+                </ul>
+                <Button className="w-full" variant="outline" onClick={() => navigate("/auth")}>
+                  Inizia Gratis
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Premium Plan */}
+            <Card className="relative hover-scale animate-fade-in border-2 border-primary/50" style={{ animationDelay: "0.1s" }}>
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-2 text-primary">Premium</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">€9.99</span>
+                    <span className="text-muted-foreground">/mese</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Per investitori attivi</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Trading avanzato</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">50 operazioni/mese</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Commissioni 1%</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Analisi avanzate</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-primary text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Supporto prioritario</span>
+                  </li>
+                </ul>
+                <Button className="w-full" onClick={() => navigate("/auth")}>
+                  Scegli Premium
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Ultra Plan */}
+            <Card className="relative hover-scale animate-fade-in border-2 border-accent/50" style={{ animationDelay: "0.2s" }}>
+              <div className="absolute top-0 right-0 bg-accent text-accent-foreground px-3 py-1 text-xs font-bold rounded-bl-lg rounded-tr-lg">
+                POPOLARE
+              </div>
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-2 text-accent">Ultra</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">€24.99</span>
+                    <span className="text-muted-foreground">/mese</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Per professionisti</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-accent text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Trading professionale</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-accent text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Operazioni illimitate</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-accent text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Commissioni 0.5%</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-accent text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">API trading</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-accent text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Account manager dedicato</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-accent text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Dati in tempo reale</span>
+                  </li>
+                </ul>
+                <Button className="w-full" onClick={() => navigate("/auth")}>
+                  Scegli Ultra
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Deluxe Plan */}
+            <Card className="relative hover-scale animate-fade-in border-2 border-success/50 bg-gradient-to-br from-card to-success/5" style={{ animationDelay: "0.3s" }}>
+              <div className="absolute top-0 right-0 bg-success text-success-foreground px-3 py-1 text-xs font-bold rounded-bl-lg rounded-tr-lg">
+                VIP
+              </div>
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-2 text-success">Deluxe</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">€49.99</span>
+                    <span className="text-muted-foreground">/mese</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Esperienza premium</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                      <span className="text-success text-xs">✓</span>
+                    </div>
+                    <span className="text-sm font-semibold">Tutto da Ultra +</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                      <span className="text-success text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Commissioni 0.1%</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                      <span className="text-success text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Trading AI assistito</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                      <span className="text-success text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Consulenza finanziaria</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                      <span className="text-success text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Accesso eventi esclusivi</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                      <span className="text-success text-xs">✓</span>
+                    </div>
+                    <span className="text-sm">Assicurazione investimenti</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-success hover:bg-success/90" onClick={() => navigate("/auth")}>
+                  Scegli Deluxe
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

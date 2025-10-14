@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Label } from "@/components/ui/label";
+import { useLivePrices } from "@/hooks/useLivePrices";
 
 const Trading = () => {
   const navigate = useNavigate();
@@ -28,6 +29,9 @@ const Trading = () => {
   const [numShares, setNumShares] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [assetFilter, setAssetFilter] = useState<"all" | "crypto" | "fiat">("all");
+  
+  // Initialize live price updates
+  useLivePrices();
 
   useEffect(() => {
     checkAuth();

@@ -31,6 +31,7 @@ import PortfolioHistory from "@/components/PortfolioHistory";
 import ActiveInvestments from "@/components/ActiveInvestments";
 import ProfitChart from "@/components/ProfitChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLivePrices } from "@/hooks/useLivePrices";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -41,6 +42,9 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState<"deposit" | "withdraw" | "swap" | "buy">("deposit");
+  
+  // Initialize live price updates
+  useLivePrices();
 
   useEffect(() => {
     checkAuth();
