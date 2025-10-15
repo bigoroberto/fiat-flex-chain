@@ -14,9 +14,40 @@ export type Database = {
   }
   public: {
     Tables: {
+      asset_price_history: {
+        Row: {
+          id: string
+          market_cap: number | null
+          price: number
+          symbol: string
+          timestamp: string | null
+          volume_24h: number | null
+        }
+        Insert: {
+          id?: string
+          market_cap?: number | null
+          price: number
+          symbol: string
+          timestamp?: string | null
+          volume_24h?: number | null
+        }
+        Update: {
+          id?: string
+          market_cap?: number | null
+          price?: number
+          symbol?: string
+          timestamp?: string | null
+          volume_24h?: number | null
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
+          card_number: string | null
+          card_type: string | null
           created_at: string | null
+          cvv: string | null
+          expiry_date: string | null
           holder_name: string | null
           iban: string | null
           id: string
@@ -27,7 +58,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          card_number?: string | null
+          card_type?: string | null
           created_at?: string | null
+          cvv?: string | null
+          expiry_date?: string | null
           holder_name?: string | null
           iban?: string | null
           id?: string
@@ -38,7 +73,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          card_number?: string | null
+          card_type?: string | null
           created_at?: string | null
+          cvv?: string | null
+          expiry_date?: string | null
           holder_name?: string | null
           iban?: string | null
           id?: string
@@ -98,6 +137,39 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          features: Json | null
+          id: string
+          name: string
+          price: number
+          priority_support: boolean | null
+          trading_fee_discount: number | null
+          withdrawal_fee_discount: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          features?: Json | null
+          id?: string
+          name: string
+          price?: number
+          priority_support?: boolean | null
+          trading_fee_discount?: number | null
+          withdrawal_fee_discount?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          features?: Json | null
+          id?: string
+          name?: string
+          price?: number
+          priority_support?: boolean | null
+          trading_fee_discount?: number | null
+          withdrawal_fee_discount?: number | null
         }
         Relationships: []
       }
@@ -196,6 +268,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          plan_id: string
+          start_date: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          plan_id: string
+          start_date?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          plan_id?: string
+          start_date?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wallets: {
         Row: {

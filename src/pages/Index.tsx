@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Shield, TrendingUp, Zap, Lock, Globe, BarChart3 } from "lucide-react";
+import { CreditCard, Shield, TrendingUp, Zap, Globe, Lock, Crown, Check, ArrowRight, BarChart3 } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();

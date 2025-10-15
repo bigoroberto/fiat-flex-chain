@@ -49,10 +49,31 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Login successful!");
-      navigate("/dashboard");
+      // Check user role
+      if (data.user) {
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (roleError) {
+          console.error("Error checking role:", roleError);
+        }
+
+        const userRole = roleData?.role || 'user';
+        
+        // Navigate based on role
+        if (userRole === 'admin') {
+          toast.success("Benvenuto Admin!");
+          navigate("/admin");
+        } else {
+          toast.success("Login effettuato con successo!");
+          navigate("/dashboard");
+        }
+      }
     } catch (error: any) {
-      toast.error(error.message || "Login failed");
+      toast.error(error.message || "Login fallito");
     } finally {
       setIsLoading(false);
     }

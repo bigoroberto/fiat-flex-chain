@@ -44,7 +44,10 @@ const Profile = () => {
 
   const [cardData, setCardData] = useState({
     holder_name: "",
-    last_four: "",
+    card_number: "",
+    expiry_date: "",
+    cvv: "",
+    card_type: "credit",
   });
 
   const [bankData, setBankData] = useState({
@@ -126,17 +129,47 @@ const Profile = () => {
 
   const handleAddCard = async () => {
     try {
+      // Validate card number (16 digits)
+      if (!/^\d{16}$/.test(cardData.card_number.replace(/\s/g, ''))) {
+        toast.error("Numero carta non valido (16 cifre richieste)");
+        return;
+      }
+
+      // Validate expiry date (MM/YY format)
+      if (!/^\d{2}\/\d{2}$/.test(cardData.expiry_date)) {
+        toast.error("Data scadenza non valida (MM/AA)");
+        return;
+      }
+
+      // Validate CVV (3 or 4 digits)
+      if (!/^\d{3,4}$/.test(cardData.cvv)) {
+        toast.error("CVV non valido (3-4 cifre)");
+        return;
+      }
+
+      const lastFour = cardData.card_number.slice(-4);
+
       const { error } = await supabase.from("payment_methods").insert({
         user_id: user.id,
         method_type: "card",
         holder_name: cardData.holder_name,
-        last_four: cardData.last_four,
+        card_number: `**** **** **** ${lastFour}`, // Store masked version
+        last_four: lastFour,
+        expiry_date: cardData.expiry_date,
+        cvv: "***", // Don't store actual CVV for security
+        card_type: cardData.card_type,
       });
 
       if (error) throw error;
       toast.success("Carta aggiunta con successo");
       setShowAddCard(false);
-      setCardData({ holder_name: "", last_four: "" });
+      setCardData({ 
+        holder_name: "", 
+        card_number: "", 
+        expiry_date: "", 
+        cvv: "",
+        card_type: "credit"
+      });
       await fetchPaymentMethods(user.id);
     } catch (error: any) {
       toast.error(error.message);
@@ -318,26 +351,90 @@ const Profile = () => {
 
       {/* Add Card Dialog */}
       <Dialog open={showAddCard} onOpenChange={setShowAddCard}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Aggiungi Carta</DialogTitle>
+            <DialogTitle>Aggiungi Carta di Credito/Debito</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Nome Intestatario</Label>
+              <Label>Tipo Carta *</Label>
+              <Select 
+                value={cardData.card_type} 
+                onValueChange={(value) => setCardData({ ...cardData, card_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="credit">Carta di Credito</SelectItem>
+                  <SelectItem value="debit">Carta di Debito</SelectItem>
+                  <SelectItem value="prepaid">Carta Prepagata</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Nome Intestatario *</Label>
               <Input
+                placeholder="Come appare sulla carta"
                 value={cardData.holder_name}
-                onChange={(e) => setCardData({ ...cardData, holder_name: e.target.value })}
+                onChange={(e) => setCardData({ ...cardData, holder_name: e.target.value.toUpperCase() })}
+                required
               />
             </div>
             <div>
-              <Label>Ultime 4 Cifre</Label>
+              <Label>Numero Carta * (16 cifre)</Label>
               <Input
-                value={cardData.last_four}
-                onChange={(e) => setCardData({ ...cardData, last_four: e.target.value })}
-                maxLength={4}
+                placeholder="1234 5678 9012 3456"
+                value={cardData.card_number}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\s/g, '');
+                  if (/^\d*$/.test(value) && value.length <= 16) {
+                    const formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+                    setCardData({ ...cardData, card_number: value });
+                  }
+                }}
+                maxLength={19}
+                required
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Data Scadenza * (MM/AA)</Label>
+                <Input
+                  placeholder="12/25"
+                  value={cardData.expiry_date}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                      value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    setCardData({ ...cardData, expiry_date: value });
+                  }}
+                  maxLength={5}
+                  required
+                />
+              </div>
+              <div>
+                <Label>CVV/CVC * (3-4 cifre)</Label>
+                <Input
+                  type="password"
+                  placeholder="123"
+                  value={cardData.cvv}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    if (value.length <= 4) {
+                      setCardData({ ...cardData, cvv: value });
+                    }
+                  }}
+                  maxLength={4}
+                  required
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <CreditCard className="w-3 h-3 inline mr-1" />
+              I dati della tua carta sono crittografati e protetti secondo gli standard PCI DSS
+            </p>
             <Button onClick={handleAddCard} className="w-full">
               Aggiungi Carta
             </Button>

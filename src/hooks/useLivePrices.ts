@@ -86,8 +86,9 @@ export const useLivePrices = () => {
 
       const allUpdates = [...cryptoUpdates, ...stockUpdates];
 
-      // Update database with new prices
+      // Update database with new prices and save to history
       for (const update of allUpdates) {
+        // Update current price
         await supabase
           .from('trading_assets')
           .update({
@@ -98,6 +99,17 @@ export const useLivePrices = () => {
             updated_at: new Date().toISOString()
           })
           .eq('symbol', update.symbol);
+
+        // Save to price history
+        await supabase
+          .from('asset_price_history')
+          .insert({
+            symbol: update.symbol,
+            price: update.current_price,
+            market_cap: update.market_cap,
+            volume_24h: update.volume_24h,
+            timestamp: new Date().toISOString()
+          });
       }
 
       console.log('Prices updated successfully');

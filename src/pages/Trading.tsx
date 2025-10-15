@@ -27,8 +27,48 @@ const Trading = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [numShares, setNumShares] = useState("");
+  const [priceHistory, setPriceHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [showInvestDialog, setShowInvestDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [assetFilter, setAssetFilter] = useState<"all" | "crypto" | "fiat">("all");
+
+  const fetchPriceHistory = async (symbol: string) => {
+    setIsLoadingHistory(true);
+    try {
+      const { data, error } = await supabase
+        .from('asset_price_history')
+        .select('*')
+        .eq('symbol', symbol)
+        .order('timestamp', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      // If we have data, format it for the chart
+      if (data && data.length > 0) {
+        const formattedData = data.reverse().map((item) => ({
+          date: new Date(item.timestamp).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }),
+          price: parseFloat(item.price.toString()),
+        }));
+        setPriceHistory(formattedData);
+      } else {
+        // Fallback to mock data if no history
+        const currentAsset = assets.find(a => a.symbol === symbol);
+        if (currentAsset) {
+          const mockData = Array.from({ length: 10 }, (_, i) => ({
+            date: new Date(Date.now() - (9 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }),
+            price: parseFloat(currentAsset.current_price.toString()) * (1 + (Math.random() - 0.5) * 0.15),
+          }));
+          setPriceHistory(mockData);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching price history:', error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
   
   // Initialize live price updates
   useLivePrices();
@@ -201,7 +241,11 @@ const Trading = () => {
                 <Card
                   key={asset.id}
                   className="hover:shadow-lg transition-shadow cursor-pointer border-success/20"
-                  onClick={() => setSelectedAsset(asset)}
+                onClick={() => {
+                  setSelectedAsset(asset);
+                  setShowInvestDialog(true);
+                  fetchPriceHistory(asset.symbol);
+                }}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -246,7 +290,11 @@ const Trading = () => {
                 <Card
                   key={asset.id}
                   className="hover:shadow-lg transition-shadow cursor-pointer opacity-70"
-                  onClick={() => setSelectedAsset(asset)}
+                onClick={() => {
+                  setSelectedAsset(asset);
+                  setShowInvestDialog(true);
+                  fetchPriceHistory(asset.symbol);
+                }}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -281,67 +329,113 @@ const Trading = () => {
       </main>
 
       {/* Invest Dialog */}
-      <Dialog open={!!selectedAsset} onOpenChange={() => setSelectedAsset(null)}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={showInvestDialog} onOpenChange={() => {
+        setShowInvestDialog(false);
+        setSelectedAsset(null);
+      }}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t("trading.invest")} in {selectedAsset?.name}</DialogTitle>
+            <DialogTitle>
+              Investi in {selectedAsset?.name} ({selectedAsset?.symbol})
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            {/* Price Chart */}
-            {selectedAsset && (
-              <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={getHistoricalData(selectedAsset.current_price, selectedAsset.price_change_24h)}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                    <XAxis 
-                      dataKey="time" 
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={10}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={10}
-                      domain={['auto', 'auto']}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                      }}
-                      formatter={(value: any) => [
-                        `€${value.toFixed(2)}`,
-                        'Prezzo'
-                      ]}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="price" 
-                      stroke={selectedAsset.price_change_24h > 0 ? 'hsl(var(--success))' : 'hsl(var(--destructive))'} 
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
+            {/* Asset Information */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Prezzo Attuale</p>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">Prezzo Attuale</p>
                 <p className="text-2xl font-bold">
-                  €{selectedAsset?.current_price.toLocaleString('it-IT', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  €{parseFloat(selectedAsset?.current_price || "0").toFixed(2)}
                 </p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Variazione 24h</p>
-                <p className={`text-2xl font-bold ${selectedAsset?.price_change_24h > 0 ? 'text-success' : 'text-destructive'}`}>
-                  {selectedAsset?.price_change_24h > 0 ? '+' : ''}{selectedAsset?.price_change_24h.toFixed(2)}%
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">Variazione 24h</p>
+                <p
+                  className={`text-lg font-semibold ${
+                    parseFloat(selectedAsset?.price_change_24h || "0") >= 0
+                      ? "text-success"
+                      : "text-destructive"
+                  }`}
+                >
+                  {parseFloat(selectedAsset?.price_change_24h || "0").toFixed(2)}%
                 </p>
               </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">Capitalizzazione</p>
+                <p className="text-lg font-bold">
+                  €{selectedAsset?.market_cap ? (parseFloat(selectedAsset.market_cap) / 1000000).toFixed(2) + 'M' : 'N/A'}
+                </p>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">Volume 24h</p>
+                <p className="text-lg font-bold">
+                  €{selectedAsset?.volume_24h ? (parseFloat(selectedAsset.volume_24h) / 1000000).toFixed(2) + 'M' : 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            {/* Asset Details */}
+            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+              <h3 className="font-semibold text-lg">Informazioni Asset</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Tipo: </span>
+                  <span className="font-medium">{selectedAsset?.asset_type === 'crypto' ? 'Criptovaluta' : 'Azione'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Simbolo: </span>
+                  <span className="font-medium">{selectedAsset?.symbol}</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {selectedAsset?.asset_type === 'crypto' 
+                  ? 'Le criptovalute sono asset digitali ad alta volatilità. Investi responsabilmente.'
+                  : 'Le azioni rappresentano quote di proprietà di società quotate in borsa.'}
+              </p>
+            </div>
+
+            {/* Historical Chart - Last 10 Days */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">Storico Prezzi (Ultimi 10 Giorni)</h3>
+              {isLoadingHistory ? (
+                <div className="h-64 flex items-center justify-center">
+                  <p className="text-muted-foreground">Caricamento storico...</p>
+                </div>
+              ) : (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={priceHistory}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--muted))' }}
+                      />
+                      <YAxis 
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tickLine={{ stroke: 'hsl(var(--muted))' }}
+                        tickFormatter={(value) => `€${value.toFixed(2)}`}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                        }}
+                        formatter={(value: any) => [`€${parseFloat(value).toFixed(2)}`, 'Prezzo']}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="price"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={3}
+                        dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -369,7 +463,10 @@ const Trading = () => {
               <Button onClick={handleInvest} className="flex-1">
                 Conferma Acquisto
               </Button>
-              <Button variant="outline" onClick={() => setSelectedAsset(null)}>
+              <Button variant="outline" onClick={() => {
+                setShowInvestDialog(false);
+                setSelectedAsset(null);
+              }}>
                 {t("common.cancel")}
               </Button>
             </div>

@@ -47,6 +47,47 @@ const Dashboard = () => {
   useLivePrices();
 
   useEffect(() => {
+    // Set up realtime subscription for wallets
+    const channel = supabase
+      .channel('wallet-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wallets',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          // Refresh wallet data when changes occur
+          if (user?.id) {
+            fetchData(user.id);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'transactions',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          // Refresh wallet data when new transactions occur
+          if (user?.id) {
+            fetchData(user.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
     checkAuth();
     setupAuthListener();
   }, []);
