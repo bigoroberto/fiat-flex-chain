@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, CreditCard, Building2 } from "lucide-react";
+import { ArrowLeft, CreditCard, Building2, Shield, Star, TrendingUp, Award } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Dialog,
@@ -205,20 +205,74 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate("/")}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-2xl font-bold bg-gradient-accent bg-clip-text text-transparent">
-              {t("profile.title")}
-            </h1>
+      <div className="relative h-48 bg-gradient-to-r from-primary via-accent to-primary overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute top-4 left-4">
+          <Button variant="ghost" onClick={() => navigate("/dashboard")} className="text-white hover:bg-white/20">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </div>
+        <div className="container mx-auto px-4 h-full flex items-end pb-6">
+          <div className="flex items-end gap-6">
+            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-lg border-4 border-white">
+              <Star className="w-12 h-12 text-primary" />
+            </div>
+            <div className="pb-2 text-white">
+              <h1 className="text-3xl font-bold">{profile?.full_name || "Utente"}</h1>
+              <p className="text-white/80 flex items-center gap-2 mt-1">
+                {profile?.kyc_verified ? (
+                  <>
+                    <Shield className="w-4 h-4 text-success" />
+                    Account Verificato
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Verifica Pendente
+                  </>
+                )}
+              </p>
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="container mx-auto px-4 py-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-8 relative z-10">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-90">Livello Account</p>
+                  <p className="text-2xl font-bold mt-1">Premium</p>
+                </div>
+                <Award className="w-10 h-10 opacity-80" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-90">KYC Status</p>
+                  <p className="text-2xl font-bold mt-1">{profile?.kyc_verified ? "Verificato" : "Pendente"}</p>
+                </div>
+                <Shield className="w-10 h-10 opacity-80" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm opacity-90">Investimenti</p>
+                  <p className="text-2xl font-bold mt-1">Attivi</p>
+                </div>
+                <TrendingUp className="w-10 h-10 opacity-80" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         {/* Personal Info */}
         <Card>
           <CardHeader>

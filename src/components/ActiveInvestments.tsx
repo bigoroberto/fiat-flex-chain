@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import AssetDetail from "./AssetDetail";
 
 interface Investment {
   asset_code: string;
@@ -17,6 +18,7 @@ interface ActiveInvestmentsProps {
 const ActiveInvestments = ({ userId }: ActiveInvestmentsProps) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedAsset, setSelectedAsset] = useState<Investment | null>(null);
 
   useEffect(() => {
     fetchInvestments();
@@ -96,7 +98,8 @@ const ActiveInvestments = ({ userId }: ActiveInvestmentsProps) => {
               return (
                 <div
                   key={investment.asset_code}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/5 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/5 transition-colors cursor-pointer"
+                  onClick={() => setSelectedAsset(investment)}
                 >
                   <div>
                     <p className="font-semibold text-lg">{investment.asset_code}</p>
@@ -134,6 +137,15 @@ const ActiveInvestments = ({ userId }: ActiveInvestmentsProps) => {
           </div>
         )}
       </CardContent>
+      {selectedAsset && (
+        <AssetDetail
+          assetCode={selectedAsset.asset_code}
+          balance={selectedAsset.balance}
+          isOpen={!!selectedAsset}
+          onClose={() => setSelectedAsset(null)}
+          userId={userId}
+        />
+      )}
     </Card>
   );
 };

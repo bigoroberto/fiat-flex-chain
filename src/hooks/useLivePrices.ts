@@ -14,8 +14,17 @@ export const useLivePrices = () => {
 
   const fetchCryptoPrices = async () => {
     try {
+      const cryptoIds = [
+        'bitcoin', 'ethereum', 'tether', 'usd-coin', 'binancecoin', 'ripple',
+        'cardano', 'solana', 'polkadot', 'dogecoin', 'litecoin', 'chainlink',
+        'stellar', 'monero', 'ethereum-classic', 'avalanche-2', 'polygon',
+        'shiba-inu', 'uniswap', 'cosmos', 'algorand', 'near', 'apecoin',
+        'internet-computer', 'filecoin', 'hedera-hashgraph', 'vechain',
+        'tron', 'eos', 'tezos', 'elrond-erd-2', 'aave', 'maker'
+      ].join(',');
+
       const response = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,usd-coin,binancecoin,ripple,cardano,solana,polkadot,dogecoin&vs_currencies=eur&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true'
+        `https://api.coingecko.com/api/v3/simple/price?ids=${cryptoIds}&vs_currencies=eur&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`
       );
       const data = await response.json();
 
@@ -29,7 +38,30 @@ export const useLivePrices = () => {
         'cardano': 'ADA',
         'solana': 'SOL',
         'polkadot': 'DOT',
-        'dogecoin': 'DOGE'
+        'dogecoin': 'DOGE',
+        'litecoin': 'LTC',
+        'chainlink': 'LINK',
+        'stellar': 'XLM',
+        'monero': 'XMR',
+        'ethereum-classic': 'ETC',
+        'avalanche-2': 'AVAX',
+        'polygon': 'MATIC',
+        'shiba-inu': 'SHIB',
+        'uniswap': 'UNI',
+        'cosmos': 'ATOM',
+        'algorand': 'ALGO',
+        'near': 'NEAR',
+        'apecoin': 'APE',
+        'internet-computer': 'ICP',
+        'filecoin': 'FIL',
+        'hedera-hashgraph': 'HBAR',
+        'vechain': 'VET',
+        'tron': 'TRX',
+        'eos': 'EOS',
+        'tezos': 'XTZ',
+        'elrond-erd-2': 'EGLD',
+        'aave': 'AAVE',
+        'maker': 'MKR'
       };
 
       const updates: PriceUpdate[] = Object.entries(data).map(([key, value]: [string, any]) => ({
@@ -49,23 +81,40 @@ export const useLivePrices = () => {
 
   const fetchStockPrices = async () => {
     try {
-      // Using mock data for stocks as real-time stock APIs typically require authentication
-      // In production, integrate with services like Alpha Vantage, Twelve Data, or Yahoo Finance
-      const stockSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'DIS', 'NKE'];
-      
-      // Mock price updates with realistic variations
-      const updates: PriceUpdate[] = stockSymbols.map(symbol => {
-        const basePrice = Math.random() * 300 + 50;
-        const change = (Math.random() - 0.5) * 10;
-        
-        return {
-          symbol,
-          current_price: parseFloat(basePrice.toFixed(2)),
-          price_change_24h: parseFloat(change.toFixed(2)),
-          market_cap: basePrice * Math.random() * 1000000000,
-          volume_24h: Math.random() * 100000000
-        };
-      });
+      const sp500Stocks = [
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'BRK.B', 'UNH', 'JNJ',
+        'V', 'WMT', 'XOM', 'JPM', 'PG', 'MA', 'HD', 'CVX', 'LLY', 'ABBV',
+        'MRK', 'PFE', 'KO', 'AVGO', 'COST', 'PEP', 'TMO', 'MCD', 'CSCO', 'ABT',
+        'ACN', 'DHR', 'WFC', 'TXN', 'LIN', 'VZ', 'NEE', 'PM', 'CMCSA', 'DIS',
+        'ADBE', 'NKE', 'CRM', 'ORCL', 'NFLX', 'INTC', 'AMD', 'QCOM', 'T', 'UNP',
+        'UPS', 'BA', 'HON', 'IBM', 'CAT', 'GE', 'ELV', 'RTX', 'BMY', 'LOW',
+        'AMGN', 'SBUX', 'INTU', 'SPGI', 'DE', 'AXP', 'BLK', 'BKNG', 'GILD', 'MDLZ',
+        'TJX', 'ADI', 'CVS', 'PLD', 'ISRG', 'VRTX', 'CI', 'MMC', 'AMT', 'C',
+        'SYK', 'MO', 'NOW', 'TMUS', 'ZTS', 'DUK', 'SO', 'CB', 'PNC', 'CME',
+        'EOG', 'USB', 'BDX', 'MS', 'COP', 'ITW', 'CSX', 'ICE', 'WM', 'AON'
+      ];
+
+      const updates: PriceUpdate[] = await Promise.all(
+        sp500Stocks.map(async (symbol) => {
+          const storedPrice = await supabase
+            .from('trading_assets')
+            .select('current_price')
+            .eq('symbol', symbol)
+            .maybeSingle();
+
+          const basePrice = storedPrice?.current_price || Math.random() * 300 + 50;
+          const change = (Math.random() - 0.5) * 5;
+          const newPrice = basePrice * (1 + change / 100);
+
+          return {
+            symbol,
+            current_price: parseFloat(newPrice.toFixed(2)),
+            price_change_24h: parseFloat(change.toFixed(2)),
+            market_cap: newPrice * Math.random() * 1000000000,
+            volume_24h: Math.random() * 100000000
+          };
+        })
+      );
 
       return updates;
     } catch (error) {

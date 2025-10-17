@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import Tutorial from "@/components/Tutorial";
 import ActionModal from "@/components/ActionModal";
-import PortfolioHistory from "@/components/PortfolioHistory";
+import TransactionHistory from "@/components/TransactionHistory";
 import ActiveInvestments from "@/components/ActiveInvestments";
 import ProfitChart from "@/components/ProfitChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -246,9 +246,9 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/settings")}
           >
             <CardContent className="flex flex-col items-center justify-center p-6 space-y-2">
               <div className="p-4 rounded-full bg-primary/10">
@@ -318,18 +318,18 @@ const Dashboard = () => {
         <Tabs defaultValue="investments" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="investments">Investimenti Attivi</TabsTrigger>
-            <TabsTrigger value="history">Storico</TabsTrigger>
+            <TabsTrigger value="history">Transazioni</TabsTrigger>
             <TabsTrigger value="profit">Guadagni</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="investments" className="mt-6">
             <ActiveInvestments userId={user?.id || ""} />
           </TabsContent>
-          
+
           <TabsContent value="history" className="mt-6">
-            <PortfolioHistory userId={user?.id || ""} />
+            <TransactionHistory userId={user?.id || ""} />
           </TabsContent>
-          
+
           <TabsContent value="profit" className="mt-6">
             <ProfitChart userId={user?.id || ""} />
           </TabsContent>

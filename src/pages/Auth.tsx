@@ -37,6 +37,33 @@ const Auth = () => {
     checkAuth();
   }, [navigate]);
 
+  const handleDemoLogin = async (isAdmin: boolean = false) => {
+    setIsLoading(true);
+    try {
+      const demoEmail = isAdmin ? "admin@demo.com" : "user@demo.com";
+      const demoPassword = "demo123456";
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+
+      if (error) throw error;
+
+      if (isAdmin) {
+        toast.success("Benvenuto Admin Demo!");
+        navigate("/admin");
+      } else {
+        toast.success("Benvenuto Utente Demo!");
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      toast.error("Account demo non disponibile. Crealo prima nel database.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -62,7 +89,7 @@ const Auth = () => {
         }
 
         const userRole = roleData?.role || 'user';
-        
+
         // Navigate based on role
         if (userRole === 'admin') {
           toast.success("Benvenuto Admin!");
@@ -255,6 +282,36 @@ const Auth = () => {
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? "Accesso in corso..." : "Accedi"}
                     </Button>
+                    <div className="relative my-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          O prova la demo
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handleDemoLogin(false)}
+                        disabled={isLoading}
+                      >
+                        Demo Utente
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handleDemoLogin(true)}
+                        disabled={isLoading}
+                      >
+                        Demo Admin
+                      </Button>
+                    </div>
                     <Button
                       type="button"
                       variant="link"
