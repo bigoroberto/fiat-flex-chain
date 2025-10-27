@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Check, Crown, Sparkles, Zap } from "lucide-react";
+import { ArrowLeft, Check, Crown, Sparkles, Zap, CreditCard, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Settings = () => {
@@ -14,6 +15,9 @@ const Settings = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -55,14 +59,29 @@ const Settings = () => {
     }
   };
 
-  const handleSelectPlan = async (planId: string) => {
+  const handleSelectPlan = async (plan: any) => {
     if (!user) return;
+
+    if (plan.price > 0) {
+      setSelectedPlan(plan);
+      setShowPaymentDialog(true);
+    } else {
+      await processPlanChange(plan.id);
+    }
+  };
+
+  const processPlanChange = async (planId: string) => {
+    if (!user) return;
+    setIsProcessing(true);
 
     try {
       if (currentSubscription) {
         await supabase
           .from("user_subscriptions")
-          .update({ status: "cancelled" })
+          .update({
+            status: "cancelled",
+            end_date: new Date().toISOString()
+          })
           .eq("id", currentSubscription.id);
       }
 
@@ -77,10 +96,20 @@ const Settings = () => {
       if (error) throw error;
 
       toast.success("Piano attivato con successo!");
+      setShowPaymentDialog(false);
+      setSelectedPlan(null);
       await fetchData(user.id);
     } catch (error: any) {
       toast.error(error.message);
+    } finally {
+      setIsProcessing(false);
     }
+  };
+
+  const handlePaymentConfirm = async () => {
+    if (!selectedPlan) return;
+
+    await processPlanChange(selectedPlan.id);
   };
 
   const getPlanIcon = (planName: string) => {
@@ -197,10 +226,10 @@ const Settings = () => {
                     <Button
                       className="w-full"
                       variant={isActive ? "outline" : "default"}
-                      onClick={() => handleSelectPlan(plan.id)}
+                      onClick={() => handleSelectPlan(plan)}
                       disabled={isActive}
                     >
-                      {isActive ? "Piano Attivo" : "Seleziona Piano"}
+                      {isActive ? "Piano Attivo" : plan.price > 0 ? `Abbonati - €${plan.price}/mese` : "Seleziona Piano Gratuito"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -209,6 +238,70 @@ const Settings = () => {
           </div>
         </div>
       </main>
+
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Conferma Abbonamento
+            </DialogTitle>
+            <DialogDescription>
+              Stai per attivare il piano {selectedPlan?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-blue-600" />
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                Il pagamento verrà processato dal sistema amministrativo.
+                I fondi saranno depositati sul conto configurato dall'admin.
+              </p>
+            </div>
+
+            <div className="space-y-2 p-4 border rounded-lg">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Piano:</span>
+                <span className="font-semibold">{selectedPlan?.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Costo:</span>
+                <span className="font-semibold text-lg">€{selectedPlan?.price.toFixed(2)}/mese</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Sconto Trading:</span>
+                <span className="font-semibold text-success">{selectedPlan?.trading_fee_discount}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Sconto Prelievi:</span>
+                <span className="font-semibold text-success">{selectedPlan?.withdrawal_fee_discount}%</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center">
+              L'abbonamento si rinnoverà automaticamente ogni mese.
+              Puoi annullare in qualsiasi momento dalle impostazioni.
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPaymentDialog(false)}
+              disabled={isProcessing}
+            >
+              Annulla
+            </Button>
+            <Button
+              onClick={handlePaymentConfirm}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Elaborazione..." : "Conferma Pagamento"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

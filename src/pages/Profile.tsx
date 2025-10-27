@@ -239,36 +239,51 @@ const Profile = () => {
 
       <main className="container mx-auto px-4 py-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-8 relative z-10">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+          <Card
+            className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 cursor-pointer hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+            onClick={() => navigate('/settings')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm opacity-90">Livello Account</p>
+                  <p className="text-sm opacity-90 font-medium">Livello Account</p>
                   <p className="text-2xl font-bold mt-1">Premium</p>
+                  <p className="text-xs opacity-75 mt-1">Clicca per gestire</p>
                 </div>
-                <Award className="w-10 h-10 opacity-80" />
+                <Award className="w-12 h-12 opacity-90" />
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+          <Card
+            className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 cursor-pointer hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+            onClick={() => {
+              const kycSection = document.getElementById('kyc-section');
+              if (kycSection) kycSection.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm opacity-90">KYC Status</p>
+                  <p className="text-sm opacity-90 font-medium">KYC Status</p>
                   <p className="text-2xl font-bold mt-1">{profile?.kyc_verified ? "Verificato" : "Pendente"}</p>
+                  <p className="text-xs opacity-75 mt-1">Clicca per verificare</p>
                 </div>
-                <Shield className="w-10 h-10 opacity-80" />
+                <Shield className="w-12 h-12 opacity-90" />
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+          <Card
+            className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 cursor-pointer hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+            onClick={() => navigate('/dashboard')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm opacity-90">Investimenti</p>
+                  <p className="text-sm opacity-90 font-medium">Investimenti</p>
                   <p className="text-2xl font-bold mt-1">Attivi</p>
+                  <p className="text-xs opacity-75 mt-1">Visualizza portfolio</p>
                 </div>
-                <TrendingUp className="w-10 h-10 opacity-80" />
+                <TrendingUp className="w-12 h-12 opacity-90" />
               </div>
             </CardContent>
           </Card>
@@ -336,7 +351,7 @@ const Profile = () => {
         </Card>
 
         {/* KYC Status */}
-        <Card>
+        <Card id="kyc-section">
           <CardHeader>
             <CardTitle>{t("profile.kyc")}</CardTitle>
           </CardHeader>
