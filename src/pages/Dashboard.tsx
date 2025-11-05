@@ -32,6 +32,7 @@ import ActiveInvestments from "@/components/ActiveInvestments";
 import ProfitChart from "@/components/ProfitChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLivePrices } from "@/hooks/useLivePrices";
+import { PortfolioSummary } from "@/components/PortfolioSummary";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -212,6 +213,9 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Portfolio Summary */}
+        <PortfolioSummary userId={user?.id || ""} />
+
         {/* Balance Card */}
         <div className="bg-gradient-primary rounded-2xl p-8 text-white shadow-lg-custom">
           <p className="text-sm opacity-80 mb-2">{t("dashboard.totalBalance")}</p>

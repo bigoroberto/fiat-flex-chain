@@ -96,7 +96,7 @@ export const useLivePrices = () => {
 
       const updates: PriceUpdate[] = await Promise.all(
         sp500Stocks.map(async (symbol) => {
-          const storedPrice = await supabase
+          const { data: storedPrice } = await supabase
             .from('trading_assets')
             .select('current_price')
             .eq('symbol', symbol)

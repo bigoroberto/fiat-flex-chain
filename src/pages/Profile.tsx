@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, CreditCard, Building2, Shield, Star, TrendingUp, Award } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { KYCVerification } from "@/components/KYCVerification";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface ProfileCardProps {
+  title: string;
+  value: string;
+  description: string;
+  icon: any;
+  gradient: string;
+  onClick: () => void;
+}
+
+const ProfileCard = ({ title, value, description, icon: Icon, gradient, onClick }: ProfileCardProps) => (
+  <Card
+    className={`bg-gradient-to-br ${gradient} text-white border-0 cursor-pointer hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl group`}
+    onClick={onClick}
+  >
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm opacity-90 font-medium">{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
+          <p className="text-xs opacity-75 mt-1 group-hover:opacity-100 transition-opacity">{description}</p>
+        </div>
+        <Icon className="w-12 h-12 opacity-90 group-hover:scale-110 transition-transform" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const Profile = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -31,6 +59,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddCard, setShowAddCard] = useState(false);
   const [showAddBank, setShowAddBank] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     full_name: "",
@@ -91,6 +120,18 @@ const Profile = () => {
         country: data.country || "",
         postal_code: data.postal_code || "",
       });
+
+      // Fetch current subscription plan
+      const { data: subData } = await supabase
+        .from("user_subscriptions")
+        .select("subscription_plans(name, price, features, trading_fee_discount, withdrawal_fee_discount)")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (subData) {
+        setCurrentPlan((subData as any)?.subscription_plans);
+      }
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -239,54 +280,33 @@ const Profile = () => {
 
       <main className="container mx-auto px-4 py-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-8 relative z-10">
-          <Card
-            className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 cursor-pointer hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+          <ProfileCard
+            title="Livello Account"
+            value={currentPlan?.name || "Standard"}
+            description="Clicca per gestire"
+            icon={Award}
+            gradient="from-blue-500 to-blue-600"
             onClick={() => navigate('/settings')}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90 font-medium">Livello Account</p>
-                  <p className="text-2xl font-bold mt-1">Premium</p>
-                  <p className="text-xs opacity-75 mt-1">Clicca per gestire</p>
-                </div>
-                <Award className="w-12 h-12 opacity-90" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card
-            className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 cursor-pointer hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+          />
+          <ProfileCard
+            title="KYC Status"
+            value={profile?.kyc_verified ? "Verificato" : "Pendente"}
+            description="Clicca per verificare"
+            icon={Shield}
+            gradient="from-green-500 to-green-600"
             onClick={() => {
               const kycSection = document.getElementById('kyc-section');
               if (kycSection) kycSection.scrollIntoView({ behavior: 'smooth' });
             }}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90 font-medium">KYC Status</p>
-                  <p className="text-2xl font-bold mt-1">{profile?.kyc_verified ? "Verificato" : "Pendente"}</p>
-                  <p className="text-xs opacity-75 mt-1">Clicca per verificare</p>
-                </div>
-                <Shield className="w-12 h-12 opacity-90" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card
-            className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 cursor-pointer hover:scale-105 transition-transform duration-300 shadow-xl hover:shadow-2xl"
+          />
+          <ProfileCard
+            title="Investimenti"
+            value="Attivi"
+            description="Visualizza portfolio"
+            icon={TrendingUp}
+            gradient="from-purple-500 to-purple-600"
             onClick={() => navigate('/dashboard')}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90 font-medium">Investimenti</p>
-                  <p className="text-2xl font-bold mt-1">Attivi</p>
-                  <p className="text-xs opacity-75 mt-1">Visualizza portfolio</p>
-                </div>
-                <TrendingUp className="w-12 h-12 opacity-90" />
-              </div>
-            </CardContent>
-          </Card>
+          />
         </div>
         {/* Personal Info */}
         <Card>
@@ -350,25 +370,12 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* KYC Status */}
-        <Card id="kyc-section">
-          <CardHeader>
-            <CardTitle>{t("profile.kyc")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  profile?.kyc_verified
-                    ? "bg-success/10 text-success"
-                    : "bg-yellow-500/10 text-yellow-600"
-                }`}
-              >
-                {profile?.kyc_verified ? "Verificato" : "In attesa di verifica"}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* KYC Verification */}
+        <KYCVerification 
+          userId={user?.id || ""}
+          profile={profile}
+          onVerificationUpdate={() => fetchProfile(user.id)}
+        />
 
         {/* Payment Methods */}
         <Card>

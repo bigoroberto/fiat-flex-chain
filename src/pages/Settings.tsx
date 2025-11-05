@@ -75,32 +75,48 @@ const Settings = () => {
     setIsProcessing(true);
 
     try {
-      if (currentSubscription) {
-        await supabase
+      // Check if user already has an active subscription
+      const { data: existingSub } = await supabase
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (existingSub) {
+        // Update existing subscription
+        const { error } = await supabase
           .from("user_subscriptions")
           .update({
-            status: "cancelled",
-            end_date: new Date().toISOString()
+            plan_id: planId,
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           })
-          .eq("id", currentSubscription.id);
+          .eq("id", existingSub.id);
+
+        if (error) throw error;
+      } else {
+        // Create new subscription
+        const { error } = await supabase
+          .from("user_subscriptions")
+          .insert({
+            user_id: user.id,
+            plan_id: planId,
+            status: "active",
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          });
+
+        if (error) throw error;
       }
-
-      const { error } = await supabase.from("user_subscriptions").insert({
-        user_id: user.id,
-        plan_id: planId,
-        status: "active",
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      });
-
-      if (error) throw error;
 
       toast.success("Piano attivato con successo!");
       setShowPaymentDialog(false);
       setSelectedPlan(null);
       await fetchData(user.id);
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || "Errore durante l'attivazione del piano");
+      console.error("Subscription error:", error);
     } finally {
       setIsProcessing(false);
     }
