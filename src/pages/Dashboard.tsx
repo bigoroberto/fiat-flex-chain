@@ -33,11 +33,13 @@ import ProfitChart from "@/components/ProfitChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLivePrices } from "@/hooks/useLivePrices";
 import { PortfolioSummary } from "@/components/PortfolioSummary";
+import { KYCGuard } from "@/components/KYCGuard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [wallets, setWallets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -140,6 +142,15 @@ const Dashboard = () => {
 
       if (walletsError) throw walletsError;
       setWallets(walletsData || []);
+      
+      // Fetch user profile for KYC status
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      
+      setProfile(profileData);
     } catch (error: any) {
       toast.error(error.message || "Errore nel caricamento dei dati");
     } finally {
@@ -278,45 +289,47 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Azioni Rapide</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Button 
-                variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
-                onClick={() => openModal("deposit")}
-              >
-                <ArrowDownLeft className="w-5 h-5" />
-                <span className="text-sm">{t("dashboard.deposit")}</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
-                onClick={() => openModal("withdraw")}
-              >
-                <ArrowUpRight className="w-5 h-5" />
-                <span className="text-sm">{t("dashboard.withdraw")}</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
-                onClick={() => openModal("buy")}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                <span className="text-sm">{t("dashboard.buy")}</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-auto py-4 flex flex-col gap-2"
-                onClick={() => openModal("swap")}
-              >
-                <ArrowLeftRight className="w-5 h-5" />
-                <span className="text-sm">{t("dashboard.swap")}</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <KYCGuard profile={profile}>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Azioni Rapide</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col gap-2"
+                  onClick={() => openModal("deposit")}
+                >
+                  <ArrowDownLeft className="w-5 h-5" />
+                  <span className="text-sm">{t("dashboard.deposit")}</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col gap-2"
+                  onClick={() => openModal("withdraw")}
+                >
+                  <ArrowUpRight className="w-5 h-5" />
+                  <span className="text-sm">{t("dashboard.withdraw")}</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col gap-2"
+                  onClick={() => openModal("buy")}
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  <span className="text-sm">{t("dashboard.buy")}</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col gap-2"
+                  onClick={() => openModal("swap")}
+                >
+                  <ArrowLeftRight className="w-5 h-5" />
+                  <span className="text-sm">{t("dashboard.swap")}</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </KYCGuard>
 
         {/* Portfolio Tabs */}
         <Tabs defaultValue="investments" className="w-full">

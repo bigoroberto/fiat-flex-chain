@@ -88,16 +88,22 @@ export const SubscriptionUpgradeDialog = ({
         return;
       }
 
-      // In a real application, this would integrate with a payment provider
-      // For now, we'll simulate the upgrade
+      // First, deactivate any existing active subscriptions
+      await supabase
+        .from("user_subscriptions")
+        .update({ status: "inactive", end_date: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      // Then create a new active subscription
       const { error } = await supabase
         .from("user_subscriptions")
-        .update({
+        .insert({
+          user_id: user.id,
           plan_id: planId,
           status: "active",
           start_date: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
+        });
 
       if (error) throw error;
 

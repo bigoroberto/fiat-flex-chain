@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { ArrowLeft, Check, Crown, Sparkles, Zap, CreditCard, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { AccountLevelBanner } from "@/components/AccountLevelBanner";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -162,6 +163,16 @@ const Settings = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-8">
+        {currentSubscription && (
+          <AccountLevelBanner
+            planName={currentSubscription.subscription_plans.name}
+            planFeatures={currentSubscription.subscription_plans.features}
+            tradingFeeDiscount={currentSubscription.subscription_plans.trading_fee_discount || 0}
+            withdrawalFeeDiscount={currentSubscription.subscription_plans.withdrawal_fee_discount || 0}
+            prioritySupport={currentSubscription.subscription_plans.priority_support || false}
+          />
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>Piano Attivo</CardTitle>

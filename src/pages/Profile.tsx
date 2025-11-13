@@ -34,17 +34,22 @@ interface ProfileCardProps {
 
 const ProfileCard = ({ title, value, description, icon: Icon, gradient, onClick }: ProfileCardProps) => (
   <Card
-    className={`bg-gradient-to-br ${gradient} text-white border-0 cursor-pointer hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl group`}
+    className={`relative bg-gradient-to-br ${gradient} text-white border-0 cursor-pointer hover:scale-[1.02] transition-all duration-500 shadow-2xl hover:shadow-3xl group overflow-hidden`}
     onClick={onClick}
   >
-    <CardContent className="p-6">
+    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+    <CardContent className="p-6 relative z-10">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm opacity-90 font-medium">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-          <p className="text-xs opacity-75 mt-1 group-hover:opacity-100 transition-opacity">{description}</p>
+        <div className="flex-1">
+          <p className="text-xs uppercase tracking-wider opacity-90 font-semibold mb-2">{title}</p>
+          <p className="text-3xl font-bold mt-1 group-hover:scale-105 transition-transform duration-300">{value}</p>
+          <p className="text-xs opacity-80 mt-2 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse"></span>
+            {description}
+          </p>
         </div>
-        <Icon className="w-12 h-12 opacity-90 group-hover:scale-110 transition-transform" />
+        <Icon className="w-14 h-14 opacity-80 group-hover:opacity-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" />
       </div>
     </CardContent>
   </Card>
@@ -283,28 +288,28 @@ const Profile = () => {
           <ProfileCard
             title="Livello Account"
             value={currentPlan?.name || "Standard"}
-            description="Clicca per gestire"
+            description="Clicca per gestire abbonamento"
             icon={Award}
-            gradient="from-blue-500 to-blue-600"
+            gradient="from-blue-600 via-blue-500 to-blue-400"
             onClick={() => navigate('/settings')}
           />
           <ProfileCard
             title="KYC Status"
-            value={profile?.kyc_verified ? "Verificato" : "Pendente"}
-            description="Clicca per verificare"
+            value={profile?.kyc_verified ? "✓ Verificato" : "⏳ Pendente"}
+            description={profile?.kyc_verified ? "Account completo" : "Completa la verifica"}
             icon={Shield}
-            gradient="from-green-500 to-green-600"
+            gradient="from-emerald-600 via-emerald-500 to-emerald-400"
             onClick={() => {
               const kycSection = document.getElementById('kyc-section');
               if (kycSection) kycSection.scrollIntoView({ behavior: 'smooth' });
             }}
           />
           <ProfileCard
-            title="Investimenti"
-            value="Attivi"
-            description="Visualizza portfolio"
+            title="Portfolio"
+            value="Dashboard"
+            description="Visualizza investimenti e trading"
             icon={TrendingUp}
-            gradient="from-purple-500 to-purple-600"
+            gradient="from-purple-600 via-purple-500 to-purple-400"
             onClick={() => navigate('/dashboard')}
           />
         </div>
