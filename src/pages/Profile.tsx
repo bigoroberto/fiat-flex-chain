@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { ArrowLeft, CreditCard, Building2, Shield, Star, TrendingUp, Award } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { KYCVerification } from "@/components/KYCVerification";
+import { AccountLevelDisplay } from "@/components/AccountLevelDisplay";
+import { KYCVerificationComplete } from "@/components/KYCVerificationComplete";
 import {
   Dialog,
   DialogContent,
@@ -313,6 +315,10 @@ const Profile = () => {
             onClick={() => navigate('/dashboard')}
           />
         </div>
+
+        {/* Account Level Display */}
+        {user && <AccountLevelDisplay userId={user.id} />}
+
         {/* Personal Info */}
         <Card>
           <CardHeader>
@@ -375,12 +381,13 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* KYC Verification */}
-        <KYCVerification 
-          userId={user?.id || ""}
-          profile={profile}
-          onVerificationUpdate={() => fetchProfile(user.id)}
-        />
+        {/* KYC Verification Complete */}
+        {user && (
+          <KYCVerificationComplete
+            userId={user.id}
+            onVerificationComplete={() => fetchProfile(user.id)}
+          />
+        )}
 
         {/* Payment Methods */}
         <Card>

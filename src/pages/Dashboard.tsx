@@ -34,6 +34,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLivePrices } from "@/hooks/useLivePrices";
 import { PortfolioSummary } from "@/components/PortfolioSummary";
 import { KYCGuard } from "@/components/KYCGuard";
+import { AccountLevelDisplay } from "@/components/AccountLevelDisplay";
+import { KYCVerificationComplete } from "@/components/KYCVerificationComplete";
+import { OrganizedPortfolio } from "@/components/OrganizedPortfolio";
 
 const Dashboard = () => {
   const navigate = useNavigate();
