@@ -10,7 +10,7 @@ import Auth from "./pages/Auth";
 import Trading from "./pages/Trading";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboardComplete from "./pages/AdminDashboardComplete";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +29,7 @@ const App = () => (
             <Route path="/trading" element={<Trading />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminDashboardComplete />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -19,6 +19,8 @@ const Settings = () => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [wallets, setWallets] = useState<any[]>([]);
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -53,6 +55,14 @@ const Settings = () => {
         .maybeSingle();
 
       setCurrentSubscription(subscriptionData);
+
+      // Fetch wallets for payment processing
+      const { data: walletsData } = await supabase
+        .from("wallets")
+        .select("*")
+        .eq("user_id", userId);
+
+      setWallets(walletsData || []);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -76,6 +86,47 @@ const Settings = () => {
     setIsProcessing(true);
 
     try {
+      // If plan has a price, debit from EUR wallet
+      if (selectedPlan && selectedPlan.price > 0) {
+        const eurWallet = wallets.find(w => w.asset_code === "EUR");
+
+        if (!eurWallet) {
+          toast.error("Wallet EUR non trovato");
+          setShowWarning(true);
+          throw new Error("EUR wallet not found");
+        }
+
+        const currentBalance = parseFloat(eurWallet.balance);
+        if (currentBalance < selectedPlan.price) {
+          toast.error(`Fondi insufficienti. Disponibili: €${currentBalance.toFixed(2)}`);
+          setShowWarning(true);
+          throw new Error("Insufficient funds");
+        }
+
+        // Debit from EUR wallet
+        const newBalance = currentBalance - selectedPlan.price;
+        const { error: walletError } = await supabase
+          .from("wallets")
+          .update({ balance: newBalance })
+          .eq("id", eurWallet.id);
+
+        if (walletError) throw walletError;
+
+        // Record transaction
+        const { error: txError } = await supabase
+          .from("transactions")
+          .insert({
+            user_id: user.id,
+            transaction_type: "buy",
+            asset_from: "EUR",
+            asset_to: `PLAN_${selectedPlan.name}`,
+            amount: selectedPlan.price,
+            status: "completed",
+          });
+
+        if (txError) console.error("Error recording transaction:", txError);
+      }
+
       // Check if user already has an active subscription
       const { data: existingSub } = await supabase
         .from("user_subscriptions")
@@ -114,6 +165,7 @@ const Settings = () => {
       toast.success("Piano attivato con successo!");
       setShowPaymentDialog(false);
       setSelectedPlan(null);
+      setShowWarning(false);
       await fetchData(user.id);
     } catch (error: any) {
       toast.error(error.message || "Errore durante l'attivazione del piano");
@@ -279,6 +331,15 @@ const Settings = () => {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {showWarning && selectedPlan?.price > 0 && (
+              <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                <p className="text-sm text-red-900 dark:text-red-100">
+                  Fondi insufficienti nel wallet EUR per questo piano. Deposita €{selectedPlan.price.toFixed(2)} per continuare.
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
               <AlertCircle className="w-5 h-5 text-blue-600" />
               <p className="text-sm text-blue-900 dark:text-blue-100">
@@ -322,7 +383,7 @@ const Settings = () => {
             </Button>
             <Button
               onClick={handlePaymentConfirm}
-              disabled={isProcessing}
+              disabled={isProcessing || showWarning}
             >
               {isProcessing ? "Elaborazione..." : "Conferma Pagamento"}
             </Button>

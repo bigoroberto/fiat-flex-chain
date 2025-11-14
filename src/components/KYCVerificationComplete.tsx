@@ -32,6 +32,8 @@ export const KYCVerificationComplete = ({ userId, onVerificationComplete }: KYCV
   });
 
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isValidatingDocument, setIsValidatingDocument] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -81,10 +83,79 @@ export const KYCVerificationComplete = ({ userId, onVerificationComplete }: KYCV
     return null;
   };
 
+  const validateDocument = async (): Promise<boolean> => {
+    if (!documentFile) {
+      setValidationErrors(["Documento obbligatorio"]);
+      return false;
+    }
+
+    setIsValidatingDocument(true);
+    setValidationErrors([]);
+
+    try {
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(",")[1]); // Extract base64 part
+        };
+        reader.readAsDataURL(documentFile);
+      });
+
+      const base64 = await base64Promise;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Not authenticated");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate_kyc_document`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            documentType: formData.documentType,
+            fullName: formData.documentNumber,
+            dateOfBirth: formData.dateOfBirth,
+            imageBase64: base64,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!result.valid) {
+        setValidationErrors(result.errors || ["Documento non valido"]);
+        return false;
+      }
+
+      if (result.requiresManualReview) {
+        toast.warning("Documento sottoposto a verifica manuale dell'admin");
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Document validation error:", error);
+      setValidationErrors(["Errore durante la validazione del documento"]);
+      return false;
+    } finally {
+      setIsValidatingDocument(false);
+    }
+  };
+
   const handleVerify = async () => {
     const error = validateKYC();
     if (error) {
       toast.error(error);
+      return;
+    }
+
+    // Validate document before submission
+    const isDocumentValid = await validateDocument();
+    if (!isDocumentValid) {
+      toast.error(validationErrors[0] || "Documento non valido");
       return;
     }
 
@@ -99,19 +170,19 @@ export const KYCVerificationComplete = ({ userId, onVerificationComplete }: KYCV
           address: formData.address,
           city: formData.city,
           country: formData.country,
-          kyc_verified: true,
-          kyc_status: "verified",
+          kyc_verified: false, // Set to false, requires admin approval
+          kyc_status: "pending", // Changed to pending for manual review
         })
         .eq("id", userId);
 
       if (updateError) throw updateError;
 
-      toast.success("KYC verificato con successo!");
+      toast.success("Documento caricato! In attesa di verifica admin.");
       setShowKYCDialog(false);
       await fetchProfile();
       onVerificationComplete?.();
     } catch (error: any) {
-      toast.error(error.message || "Errore durante la verifica KYC");
+      toast.error(error.message || "Errore durante il caricamento del documento");
     } finally {
       setIsProcessing(false);
     }
@@ -276,16 +347,37 @@ export const KYCVerificationComplete = ({ userId, onVerificationComplete }: KYCV
                 <input
                   type="file"
                   accept="image/*,.pdf"
-                  onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setDocumentFile(file);
+                    setValidationErrors([]); // Clear errors on new file
+                  }}
                   className="hidden"
                   id="doc-upload"
                 />
                 <label htmlFor="doc-upload" className="cursor-pointer block">
                   <Upload className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm">{documentFile?.name || "Clicca per caricare"}</p>
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG o PDF</p>
                 </label>
               </div>
+              {documentFile && (
+                <p className="text-xs text-success mt-2">✓ File caricato: {(documentFile.size / 1024).toFixed(0)} KB</p>
+              )}
             </div>
+
+            {validationErrors.length > 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {validationErrors.map((err, idx) => (
+                      <li key={idx} className="text-sm">{err}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="flex items-center space-x-2">
               <Checkbox
